@@ -1,0 +1,20 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>prompt.js smoke tests</title>
+<script src="../../src/lib/prompt.js"></script>
+<pre id="out"></pre>
+<script>
+  const out = document.getElementById('out');
+  function log(msg) { out.textContent += msg + "\n"; }
+
+  const input = '朝は小雨。駅まで走って遅刻しそう。夕方は公園で彼岸花がきれい。少し疲れたけど、友達と会って元気が出た。';
+  const diary = PictureDiary.generateDiary(input);
+  const built = PictureDiary.buildImagePrompt({ rawText: input, diary, style: 'watercolor', aspect: '1:1', detail: 'balanced' });
+
+  log('Diary:');
+  log(diary);
+  log('\nPrompt:');
+  log(built.prompt);
+  log('\nTone: ' + built.tone);
+  log('Keywords: ' + built.keywords.join(', '));
+</script>
