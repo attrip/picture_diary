@@ -1,5 +1,57 @@
 (() => {
   const $ = (sel) => document.querySelector(sel);
+  // Generate PNG favicons at runtime to avoid maintaining raster files
+  function ensurePngIcons() {
+    function makePng(size) {
+      const c = document.createElement('canvas');
+      c.width = c.height = size;
+      const ctx = c.getContext('2d');
+      // Background
+      ctx.fillStyle = '#0f1216';
+      ctx.fillRect(0, 0, size, size);
+      // Panel
+      const r = Math.max(4, Math.floor(size * 0.18));
+      ctx.fillStyle = '#151a21';
+      roundRect(ctx, Math.floor(size*0.09), Math.floor(size*0.09), Math.floor(size*0.82), Math.floor(size*0.82), r);
+      ctx.fill();
+      // Gradient text-like mark (PD simplified)
+      const g = ctx.createLinearGradient(0, 0, size, size);
+      g.addColorStop(0, '#6aa4ff');
+      g.addColorStop(1, '#51c28e');
+      ctx.fillStyle = g;
+      ctx.font = `${Math.floor(size*0.46)}px system-ui, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('PD', size/2, size/2 + Math.floor(size*0.02));
+      return c.toDataURL('image/png');
+    }
+    function roundRect(ctx, x, y, w, h, r) {
+      const rr = Math.min(r, w/2, h/2);
+      ctx.beginPath();
+      ctx.moveTo(x+rr, y);
+      ctx.arcTo(x+w, y, x+w, y+h, rr);
+      ctx.arcTo(x+w, y+h, x, y+h, rr);
+      ctx.arcTo(x, y+h, x, y, rr);
+      ctx.arcTo(x, y, x+w, y, rr);
+      ctx.closePath();
+    }
+    function upsertIcon(rel, sizes, href) {
+      const selector = `link[rel='${rel}'][sizes='${sizes}']`;
+      let link = document.querySelector(selector);
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = rel;
+        link.sizes = sizes;
+        document.head.appendChild(link);
+      }
+      link.href = href;
+    }
+    try {
+      upsertIcon('icon', '16x16', makePng(16));
+      upsertIcon('icon', '32x32', makePng(32));
+      upsertIcon('apple-touch-icon', '180x180', makePng(180));
+    } catch (_) { /* noop */ }
+  }
   const rawEl = $('#rawText');
   const diaryEl = $('#diaryOut');
   const promptEl = $('#promptOut');
@@ -378,5 +430,12 @@
       if (presetInstrEl) presetInstrEl.value = '';
       if (presetBpmEl) presetBpmEl.value = '';
     });
+  }
+
+  // Create PNG favicon/touch icons dynamically (fallbacks in addition to SVG)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', ensurePngIcons);
+  } else {
+    ensurePngIcons();
   }
 })();

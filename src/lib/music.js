@@ -138,7 +138,7 @@
       `テーマ: ${theme || '日常 / 都会 / 余韻'}`,
       `構成: ${structure}`,
       `ミックス: ボーカル前面、楽器は歌を支える。過度な歪みを避け、明瞭さ重視。`,
-    ].join(' / ');
+    ].join(', ');
 
     const en = [
       `genre: ${g.en} (${g.instr})`,
@@ -150,7 +150,7 @@
       `theme: ${theme || 'everyday / city / afterglow'}`,
       `structure: ${structure}`,
       `mix: vocals forward; instruments supportive; avoid harsh distortion; keep clarity.`,
-    ].join(' / ');
+    ].join(', ');
 
     return { prompt: `${jp}\n-- ${en}`, ideas: lyricIdeas({ theme, mood, vocal, lang: language }), toneLabel: tn };
   }
