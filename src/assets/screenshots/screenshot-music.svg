@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720">
+  <defs>
+    <style>
+      .bg{fill:#0f1216}
+      .panel{fill:#151a21;stroke:#223041;stroke-width:2}
+      .txt{font:16px/1.4 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;fill:#e7edf3}
+      .muted{fill:#93a1b1}
+      .h2{font:22px/1.2 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+      .chip{fill:#1a2431;stroke:#223041}
+      .primary{fill:#6aa4ff;stroke:#4b84df}
+    </style>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1200" height="720"/>
+  <g transform="translate(60,40)">
+    <rect class="panel" width="1080" height="640" rx="12"/>
+    <text class="txt h2" x="20" y="36">音楽プロンプト（Suno風）</text>
+    <g transform="translate(20,56)">
+      <rect class="panel" width="1040" height="120" rx="10"/>
+      <text class="txt" x="12" y="28">テーマ / ジャンル / 雰囲気 / ボーカル / 言語 / トーン / テンポ</text>
+      <g transform="translate(0,46)">
+        <rect class="chip" width="92" height="28" rx="14"/>
+        <text class="txt" x="12" y="24">City Pop</text>
+        <g transform="translate(100,0)">
+          <rect class="chip" width="72" height="28" rx="14"/>
+          <text class="txt" x="12" y="24">Lo-fi</text>
+        </g>
+        <g transform="translate(176,0)">
+          <rect class="chip" width="68" height="28" rx="14"/>
+          <text class="txt" x="12" y="24">Trap</text>
+        </g>
+        <g transform="translate(248,0)">
+          <rect class="chip" width="68" height="28" rx="14"/>
+          <text class="txt" x="12" y="24">R&amp;B</text>
+        </g>
+      </g>
+    </g>
+    <g transform="translate(20,190)">
+      <rect class="primary" width="220" height="32" rx="8"/>
+      <text class="bg" x="32" y="24">音楽プロンプトを生成</text>
+    </g>
+    <g transform="translate(20,240)">
+      <rect class="panel" width="1040" height="164" rx="10"/>
+      <text class="txt muted" x="12" y="28">genre: city pop, mood: nostalgic, tempo: medium, vocal: singing…</text>
+    </g>
+    <g transform="translate(20,420)">
+      <rect class="panel" width="1040" height="164" rx="10"/>
+      <text class="txt muted" x="12" y="28">サビ）雨上がりの帰り道 — そっと浮かぶ夜の色…</text>
+    </g>
+  </g>
+</svg>
