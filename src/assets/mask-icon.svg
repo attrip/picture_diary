@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Safari pinned tab mask: uses solid fill only -->
+  <rect x="48" y="48" width="416" height="416" rx="88" fill="#000"/>
+  <path d="M136 340V172h92q40 0 64 20t24 56q0 38-24.5 60T232 330h-56v10h-40Zm96-56q24 0 38-12.5t14-33.5q0-20-14-32.5T232 192h-56v92h56Z" fill="#000"/>
+  <path d="M292 172h44l52 86 52-86h44l-76 124v44h-40v-44l-76-124Z" fill="#000"/>
+</svg>

@@ -29,6 +29,17 @@ A tiny, static web app that turns your text into a diary-style entry and generat
 - Added a simple music prompt generator with genre chips (J-POP, city pop, lo-fi, trap, R&B, rock, etc.).
 - Generates a structured prompt plus small lyric ideas for singing or rap in Japanese/English.
 
+### Meta, Icons, and Social
+
+- Head meta: description, canonical, Open Graph/Twitter, theme-color, PWA basics.
+- Icons:
+  - Favicon/Safari pinned: `src/assets/icon.svg`, `src/assets/mask-icon.svg`
+  - Manifest: `src/site.webmanifest` (SVG icon; PNG推奨の場合は `512x512` と `192x192` を追加してください)
+  - Apple Touch Icon: 180x180 PNG を `src/assets/apple-touch-icon.png` に配置すると有効化されます。
+- OG画像:
+  - 現状は GitHub のリポジトリOGを暫定使用。
+  - 独自の `src/assets/og-image.jpg` (1200x630) を用意して、`index.html` の `og:image` を差し替えてください。
+
 ## Roadmap
 
 - Add presets for style (watercolor, manga, oil paint, photo)
