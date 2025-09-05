@@ -131,6 +131,14 @@ button:hover { filter: brightness(1.05); }
 /* Combined diary + prompt layout inside a single card (stacked vertically for readability) */
 .split-grid { display: grid; gap: 12px; grid-template-columns: 1fr; }
 
+/* Compact controls for Suno-style music section */
+#musicCard .row { gap: 8px; }
+#musicCard .row .field { flex: 0 1 160px; min-width: 120px; }
+#musicCard .field label { font-size: 12px; margin-bottom: 4px; color: var(--muted); }
+#musicCard select { padding: 6px 8px; font-size: 14px; line-height: 1.2; height: 36px; }
+#musicCard .chips .chip { padding: 4px 8px; font-size: 13px; }
+#musicCard .hint { margin-top: 4px; }
+
 details summary {
   cursor: pointer;
   color: var(--muted);
