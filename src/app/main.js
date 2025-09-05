@@ -135,7 +135,31 @@
         diaryEl.value = diary;
       }
 
-      const text = (source && 'value' in source) ? (source.value || '') : '';
+      // Build text to copy; for diary, wrap with explicit intent if essay/rap
+      let text = (source && 'value' in source) ? (source.value || '') : '';
+      if (source === diaryEl) {
+        const style = (diaryStyleEl && diaryStyleEl.value) || 'prose';
+        if (style === 'essay') {
+          const tone = PictureDiary && PictureDiary.detectTone ? PictureDiary.detectTone(rawEl.value || '') : 'neutral';
+          const toneJp = tone === 'positive' ? '前向き' : tone === 'negative' ? '静か' : '自然';
+          text = [
+            'エッセイを日本語で作成してください。',
+            `条件: 3〜5段落、読みやすい構成、${toneJp}なトーン。箇条書きは使わず、滑らかに。`,
+            '',
+            '題材メモ:',
+            (text || '').trim(),
+          ].join('\n');
+        } else if (style === 'rap') {
+          text = [
+            '日本語のラップ歌詞を作成してください。',
+            '構成: intro, verse, pre-chorus, chorus（hook）。短いフレーズで、自然な韻や反復を適度に。',
+            '表現: 過度に露骨な表現は避け、読みやすさとリズムを両立。',
+            '',
+            '題材メモ:',
+            (text || '').trim(),
+          ].join('\n');
+        }
+      }
       if (text) {
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(text).catch(() => {});
