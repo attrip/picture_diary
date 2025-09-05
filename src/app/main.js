@@ -683,6 +683,64 @@
       }
     });
   }
+  // Quick presets for Suno-style music
+  const musicQuickPresets = document.getElementById('musicQuickPresets');
+  const musicPresetLabel = document.getElementById('musicPresetLabel');
+  const MUSIC_PRESETS = {
+    lofi_night: { genre: 'lofi', mood: 'night', vocal: 'rap', language: 'ja', tempo: 'mid', tone: 'introspective', theme: '夜散歩 / 雨上がり' },
+    city_afterglow: { genre: 'citypop', mood: 'nostalgic', vocal: 'sing', language: 'ja', tempo: 'mid', tone: 'romantic', theme: '都会 / 余韻' },
+    trap_rain: { genre: 'trap', mood: 'rainy', vocal: 'rap', language: 'ja', tempo: 'fast', tone: 'punchy', theme: '雨 / 都会の夜' },
+    acoustic_morning: { genre: 'acoustic', mood: 'sunny', vocal: 'sing', language: 'ja', tempo: 'slow', tone: 'minimal', theme: '朝 / 窓辺' },
+    jazz_cafe: { genre: 'jazz', mood: 'cozy', vocal: 'sing', language: 'mix', tempo: 'slow', tone: 'poetic', theme: 'カフェ / 雨音' },
+    bossa_sunset: { genre: 'bossa', mood: 'warm', vocal: 'sing', language: 'ja', tempo: 'slow', tone: 'romantic', theme: '夕暮れ / 海辺' },
+  };
+  function setMusicPresetName(name) {
+    if (!musicPresetLabel) return;
+    musicPresetLabel.textContent = name ? `現在のプリセット: ${name}` : '';
+  }
+  function applyMusicPreset(key) {
+    if (key === 'clear') {
+      if (musicThemeEl) musicThemeEl.value = '';
+      if (musicGenreEl) musicGenreEl.value = 'citypop';
+      if (musicMoodEl) musicMoodEl.value = 'nostalgic';
+      if (musicVocalEl) musicVocalEl.value = 'sing';
+      if (musicLangEl) musicLangEl.value = 'ja';
+      if (musicTempoEl) musicTempoEl.value = 'mid';
+      if (musicToneEl) musicToneEl.value = 'introspective';
+      setMusicPresetName('（既定）');
+      updateThemePreview();
+      updateGenreUI();
+      generateMusic();
+      return;
+    }
+    if (key === 'random') {
+      const keys = Object.keys(MUSIC_PRESETS);
+      key = keys[Math.floor(Math.random() * keys.length)];
+    }
+    const p = MUSIC_PRESETS[key];
+    if (!p) return;
+    if (musicThemeEl) musicThemeEl.value = p.theme || '';
+    if (musicGenreEl) musicGenreEl.value = p.genre;
+    if (musicMoodEl) musicMoodEl.value = p.mood;
+    if (musicVocalEl) musicVocalEl.value = p.vocal;
+    if (musicLangEl) musicLangEl.value = p.language;
+    if (musicTempoEl) musicTempoEl.value = p.tempo;
+    if (musicToneEl) musicToneEl.value = p.tone;
+    const btn = musicQuickPresets && musicQuickPresets.querySelector(`[data-preset='${key}']`);
+    setMusicPresetName(btn ? btn.textContent : key);
+    updateThemePreview();
+    updateGenreUI();
+    generateMusic();
+  }
+  if (musicQuickPresets) {
+    musicQuickPresets.addEventListener('click', (e) => {
+      const t = e.target;
+      if (t && t.matches('button[data-preset]')) {
+        const k = t.getAttribute('data-preset');
+        applyMusicPreset(k);
+      }
+    });
+  }
   if (presetAddBtn) {
     presetAddBtn.addEventListener('click', () => {
       const key = (presetKeyEl && presetKeyEl.value || '').trim();

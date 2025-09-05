@@ -186,6 +186,18 @@
 
       <section class="card wide" id="musicCard">
         <h2>音楽プロンプト（Suno風）</h2>
+        <h3 style="margin:8px 0 6px;">クイックプリセット（細かい設定不要）</h3>
+        <div class="chips" id="musicQuickPresets">
+          <button type="button" class="chip" data-preset="lofi_night">Lo-fi 夜散歩</button>
+          <button type="button" class="chip" data-preset="city_afterglow">City Pop 余韻</button>
+          <button type="button" class="chip" data-preset="trap_rain">Trap 雨上がり</button>
+          <button type="button" class="chip" data-preset="acoustic_morning">Acoustic 朝</button>
+          <button type="button" class="chip" data-preset="jazz_cafe">Jazz カフェ</button>
+          <button type="button" class="chip" data-preset="bossa_sunset">Bossa 夕暮れ</button>
+          <button type="button" class="chip ghost" data-preset="random">おまかせ</button>
+          <button type="button" class="chip ghost" data-preset="clear">選択しない（既定）</button>
+        </div>
+        <small id="musicPresetLabel" class="hint"></small>
         <div class="row">
           <div class="field" id="musicThemeGroup" style="min-width:280px">
             <label for="musicTheme">テーマ（短く・名詞で）</label>
