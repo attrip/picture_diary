@@ -70,7 +70,12 @@ button.primary { background: var(--accent); border-color: var(--accent-600); col
 button:hover { filter: brightness(1.05); }
 .copied { background: var(--success); border-color: var(--success-600); color: #0b1020; }
 
-.actions { margin-top: 8px; display: flex; gap: 8px; }
+.actions { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+.actions > * { max-width: 100%; }
+@media (max-width: 480px) {
+  /* Avoid overflow on narrow screens by allowing buttons to wrap nicely */
+  .chat .actions button { flex: 1 1 calc(50% - 8px); }
+}
 .hint { color: var(--muted); margin-top: 8px; }
 .footer { color: var(--muted); text-align: center; }
 
@@ -82,9 +87,15 @@ button:hover { filter: brightness(1.05); }
 .msg.assistant { background: #131a22; align-self: start; }
 .msg.user { background: #172234; margin-left: auto; }
 .msg.compact { margin-top: -2px; }
-.chat-controls { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
-.chat-controls input, .chat-controls textarea { background: #0d1117; color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; max-width: 100%; }
+.chat-controls { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: stretch; overflow: hidden; }
+.chat-controls input, .chat-controls textarea { background: #0d1117; color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; max-width: 100%; min-width: 0; }
 .chat-controls textarea { resize: none; height: 56px; min-height: 56px; max-height: 56px; }
+
+/* Stack input and send button on narrow screens to avoid overflow */
+@media (max-width: 560px) {
+  .chat-controls { grid-template-columns: 1fr; }
+  .chat-controls button { width: 100%; }
+}
 .ideas-row { display: grid; gap: 6px; }
 
 /* Typing effect caret */
@@ -115,6 +126,9 @@ button:hover { filter: brightness(1.05); }
 .chip.ghost.active { background: rgba(106,164,255,0.2); color: var(--text); border-color: var(--accent-600); }
 
 .input-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+
+/* Combined diary + prompt layout inside a single card (stacked vertically for readability) */
+.split-grid { display: grid; gap: 12px; grid-template-columns: 1fr; }
 
 details summary {
   cursor: pointer;

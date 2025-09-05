@@ -154,29 +154,34 @@
       </section>
 
       <section class="card">
-        <h2>日記（自動整形）</h2>
+        <h2>日記と画像生成プロンプト</h2>
         <div class="chips" id="diaryStyleChips2" aria-label="整形スタイル">
           <button type="button" class="chip" data-diary-style="prose">文章</button>
           <button type="button" class="chip" data-diary-style="essay">エッセイ</button>
           <button type="button" class="chip" data-diary-style="rap">ラップ</button>
         </div>
-        <textarea id="diaryOut" rows="10" readonly></textarea>
-        <div class="actions">
-          <button data-copy="#diaryOut">コピー</button>
-          <button data-open="chatgpt" data-source="#diaryOut">ChatGPTで開く</button>
-          <button data-open="gemini" data-source="#diaryOut">Geminiで開く</button>
-        </div>
-      </section>
 
-      <section class="card">
-        <h2>画像生成プロンプト</h2>
-        <textarea id="promptOut" rows="12" readonly></textarea>
-        <div class="actions">
-          <button data-copy="#promptOut">コピー</button>
-          <button data-open="chatgpt">ChatGPTで開く</button>
-          <button data-open="gemini">Geminiで開く</button>
+        <div class="split-grid">
+          <div>
+            <h3 style="margin:6px 0;">日記（自動整形）</h3>
+            <textarea id="diaryOut" rows="10" readonly></textarea>
+            <div class="actions">
+              <button data-copy="#diaryOut">コピー</button>
+              <button data-open="chatgpt" data-source="#diaryOut">ChatGPTで開く</button>
+              <button data-open="gemini" data-source="#diaryOut">Geminiで開く</button>
+            </div>
+          </div>
+          <div>
+            <h3 style="margin:6px 0;">画像生成プロンプト</h3>
+            <textarea id="promptOut" rows="12" readonly></textarea>
+            <div class="actions">
+              <button data-copy="#promptOut">コピー</button>
+              <button data-open="chatgpt">ChatGPTで開く</button>
+              <button data-open="gemini">Geminiで開く</button>
+            </div>
+            <p class="hint">「ChatGPTで開く」「Geminiで開く」を押すと、プロンプトをコピーして新しいタブを開きます。貼り付けて送信してください。</p>
+          </div>
         </div>
-        <p class="hint">「ChatGPTで開く」「Geminiで開く」を押すと、プロンプトをコピーして新しいタブを開きます。貼り付けて送信してください。</p>
       </section>
 
       <section class="card">
