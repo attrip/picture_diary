@@ -711,12 +711,29 @@
   const musicQuickPresets = document.getElementById('musicQuickPresets');
   const musicPresetLabel = document.getElementById('musicPresetLabel');
   const MUSIC_PRESETS = {
+    // 日記・エッセイ系
     lofi_night: { genre: 'lofi', mood: 'night', vocal: 'rap', language: 'ja', tempo: 'mid', tone: 'introspective', theme: '夜散歩 / 雨上がり' },
-    city_afterglow: { genre: 'citypop', mood: 'nostalgic', vocal: 'sing', language: 'ja', tempo: 'mid', tone: 'romantic', theme: '都会 / 余韻' },
-    trap_rain: { genre: 'trap', mood: 'rainy', vocal: 'rap', language: 'ja', tempo: 'fast', tone: 'punchy', theme: '雨 / 都会の夜' },
     acoustic_morning: { genre: 'acoustic', mood: 'sunny', vocal: 'sing', language: 'ja', tempo: 'slow', tone: 'minimal', theme: '朝 / 窓辺' },
-    jazz_cafe: { genre: 'jazz', mood: 'cozy', vocal: 'sing', language: 'mix', tempo: 'slow', tone: 'poetic', theme: 'カフェ / 雨音' },
-    bossa_sunset: { genre: 'bossa', mood: 'warm', vocal: 'sing', language: 'ja', tempo: 'slow', tone: 'romantic', theme: '夕暮れ / 海辺' },
+    jpop_ballad: { genre: 'jpop', mood: 'nostalgic', vocal: 'sing', language: 'ja', tempo: 'mid', tone: 'romantic', theme: 'memories / letter' },
+    indie_pop: { genre: 'rock', mood: 'sunny', vocal: 'sing', language: 'ja', tempo: 'mid', tone: 'empowering', theme: 'weekend / small town' },
+
+    // ラップ／ビート系
+    boom_bap_jp: { genre: 'rap', mood: 'calm', vocal: 'rap', language: 'ja', tempo: 'mid', tone: 'introspective', theme: 'city night / way home' },
+    lofi_rap: { genre: 'lofi', mood: 'rainy', vocal: 'rap', language: 'ja', tempo: 'mid', tone: 'storytelling', theme: 'afterglow / neon' },
+    trap_rain: { genre: 'trap', mood: 'rainy', vocal: 'rap', language: 'ja', tempo: 'fast', tone: 'punchy', theme: '雨 / 都会の夜' },
+    chill_rap: { genre: 'lofi', mood: 'dreamy', vocal: 'rap', language: 'ja', tempo: 'slow', tone: 'minimal', theme: 'low-pressure day' },
+
+    // 世界観／物語系
+    city_afterglow: { genre: 'citypop', mood: 'nostalgic', vocal: 'sing', language: 'ja', tempo: 'mid', tone: 'romantic', theme: 'highway / afterglow' },
+    jazz_cafe: { genre: 'jazz', mood: 'cozy', vocal: 'sing', language: 'mix', tempo: 'slow', tone: 'poetic', theme: 'cafe / rain' },
+    bossa_sunset: { genre: 'bossa', mood: 'warm', vocal: 'sing', language: 'ja', tempo: 'slow', tone: 'romantic', theme: 'sunset / ocean' },
+    ambient_afterglow: { genre: 'edm', mood: 'dreamy', vocal: 'sing', language: 'ja', tempo: 'slow', tone: 'minimal', theme: 'city / afterglow' },
+    dub_night: { genre: 'dub', mood: 'rainy', vocal: 'sing', language: 'mix', tempo: 'slow', tone: 'introspective', theme: 'alley / echoes' },
+
+    // エネルギッシュ／遊び
+    emo_rock: { genre: 'rock', mood: 'energetic', vocal: 'sing', language: 'ja', tempo: 'mid', tone: 'empowering', theme: 'school / after school' },
+    punk_garage: { genre: 'rock', mood: 'sunny', vocal: 'sing', language: 'ja', tempo: 'fast', tone: 'punchy', theme: 'weekend / skate' },
+    edm_house: { genre: 'edm', mood: 'sunny', vocal: 'sing', language: 'mix', tempo: 'fast', tone: 'empowering', theme: 'party / dance' },
   };
   function setMusicPresetName(name) {
     if (!musicPresetLabel) return;
@@ -743,6 +760,15 @@
     }
     const p = MUSIC_PRESETS[key];
     if (!p) return;
+    // Ensure genre exists in select; if not, append as custom label
+    if (musicGenreEl && !Array.from(musicGenreEl.options).some(o => o.value === p.genre)) {
+      // Try to register a lightweight custom genre label to be safe
+      try { MusicPrompt.addGenre(p.genre, { jp: p.genre, en: p.genre, instr: 'custom instruments', bpm: '90-110' }); } catch (_) {}
+      const opt = document.createElement('option');
+      opt.value = p.genre;
+      opt.textContent = p.genre;
+      musicGenreEl.appendChild(opt);
+    }
     if (musicThemeEl) musicThemeEl.value = p.theme || '';
     if (musicGenreEl) musicGenreEl.value = p.genre;
     if (musicMoodEl) musicMoodEl.value = p.mood;
