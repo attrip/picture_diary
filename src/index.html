@@ -34,6 +34,13 @@
     <header class="container">
       <h1>Picture Diary</h1>
       <p class="sub">テキストを日記に整形し、絵を作るためのプロンプトを生成します。</p>
+      <nav class="steps" aria-label="作成ステップ">
+        <ol>
+          <li id="step-input" aria-current="step">1. 入力</li>
+          <li id="step-format">2. 整形</li>
+          <li id="step-prompt">3. プロンプト</li>
+        </ol>
+      </nav>
     </header>
 
     <main class="container grid">
@@ -112,23 +119,6 @@
             </select>
           </div>
           <div class="field">
-            <label for="aspect">アスペクト比</label>
-            <select id="aspect">
-              <option value="1:1">1:1</option>
-              <option value="3:2">3:2</option>
-              <option value="4:3">4:3</option>
-              <option value="16:9">16:9</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="detail">ディテール</label>
-            <select id="detail">
-              <option value="balanced">標準</option>
-              <option value="simple">簡素</option>
-              <option value="high">高精細</option>
-            </select>
-          </div>
-          <div class="field">
             <label for="diaryStyle">整形スタイル</label>
             <select id="diaryStyle">
               <option value="prose" selected>通常（文章）</option>
@@ -141,14 +131,37 @@
               <button type="button" class="chip" data-diary-style="rap">ラップ</button>
             </div>
           </div>
-          <div class="field" style="min-width: 260px; align-self: end;">
-            <label for="titleInImage">画像内の文字</label>
-            <label style="display:flex; gap:8px; align-items:center;">
-              <input id="titleInImage" type="checkbox" />
-              <span>基本は文字を描かない（必要なら小さなタイトルのみ）</span>
-            </label>
-          </div>
         </div>
+
+        <details id="detailsOpts">
+          <summary aria-controls="detailsOpts">詳細設定</summary>
+          <div class="row" aria-label="詳細設定の選択肢">
+            <div class="field">
+              <label for="aspect">アスペクト比</label>
+              <select id="aspect">
+                <option value="1:1">1:1</option>
+                <option value="3:2">3:2</option>
+                <option value="4:3">4:3</option>
+                <option value="16:9">16:9</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="detail">ディテール</label>
+              <select id="detail">
+                <option value="balanced">標準</option>
+                <option value="simple">簡素</option>
+                <option value="high">高精細</option>
+              </select>
+            </div>
+            <div class="field" style="min-width: 260px; align-self: end;">
+              <label for="titleInImage">画像内の文字</label>
+              <label style="display:flex; gap:8px; align-items:center;">
+                <input id="titleInImage" type="checkbox" />
+                <span>基本は文字を描かない（必要なら小さなタイトルのみ）</span>
+              </label>
+            </div>
+          </div>
+        </details>
 
         <button id="generateBtn" class="primary">日記とプロンプトを生成</button>
       </section>
@@ -361,4 +374,5 @@
     <script src="./lib/log.js"></script>
     <script src="./app/main.js"></script>
   </body>
+  <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
   </html>

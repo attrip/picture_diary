@@ -162,9 +162,12 @@
       }
       if (text) {
         if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(text).catch(() => {});
+          navigator.clipboard.writeText(text)
+            .then(() => { try { showToast('コピーして開きました'); } catch(_){} })
+            .catch(() => { try { showToast('コピーしました'); } catch(_){} });
         } else if (source && source.select) {
           try { source.select(); document.execCommand('copy'); } catch(_) {}
+          try { showToast('コピーして開きました'); } catch(_){}
         }
       }
 
@@ -176,6 +179,25 @@
       window.open(url, '_blank', 'noopener');
     }
   });
+
+  // Toast + Step helpers
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 1200);
+  }
+  function setStep(step) {
+    const ids = { input: 'step-input', format: 'step-format', prompt: 'step-prompt' };
+    Object.values(ids).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.removeAttribute('aria-current');
+    });
+    const cur = document.getElementById(ids[step] || ids.input);
+    if (cur) cur.setAttribute('aria-current', 'step');
+  }
+  if (rawEl) rawEl.addEventListener('input', () => setStep('input'));
 
   btn.addEventListener('click', () => {
     const raw = rawEl.value.trim();
@@ -193,6 +215,8 @@
 
     diaryEl.value = diary;
     promptEl.value = prompt;
+    // Step bar -> prompt
+    try { setStep('prompt'); } catch(_){}
     // Log image prompt generation
     try {
       PDLog && PDLog.add('image', {
@@ -480,6 +504,8 @@
     });
     diaryEl.value = diary;
     promptEl.value = prompt;
+    // Step bar -> prompt
+    try { setStep('prompt'); } catch(_){}
     // Log chat finalize as image prompt with answers
     try {
       PDLog && PDLog.add('chat-finalize', {
