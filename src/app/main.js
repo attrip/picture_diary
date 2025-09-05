@@ -879,7 +879,82 @@
     if (!el || !window.PDLog) return;
     try {
       el.textContent = `保存件数: ${PDLog.count()} 件（この端末内）`;
+      renderHistoryList();
     } catch (_) {}
+  }
+  function fmtTs(ts) {
+    try {
+      const d = new Date(ts);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      return `${y}/${m}/${day} ${hh}:${mm}`;
+    } catch { return ts; }
+  }
+  function firstLineOf(s) {
+    if (!s) return '';
+    const t = String(s).trim();
+    const nl = t.split(/\n+/)[0];
+    return (nl || t).replace(/\s+/g, ' ').slice(0, 120);
+  }
+  function renderHistoryList() {
+    const listEl = document.getElementById('historyList');
+    if (!listEl || !window.PDLog) return;
+    const items = (PDLog.list() || []).slice().sort((a, b) => (a.ts < b.ts ? 1 : -1)).slice(0, 20);
+    listEl.innerHTML = '';
+    for (const it of items) {
+      const li = document.createElement('li');
+      li.className = 'history-item';
+      const type = document.createElement('span');
+      type.className = 'history-type';
+      type.textContent = it.type === 'music' ? 'music' : (it.type === 'chat-finalize' ? 'chat' : 'image');
+      const title = document.createElement('div');
+      title.className = 'history-title';
+      const line = firstLineOf(it.diary || it.prompt || it.raw || it.theme || '');
+      title.textContent = line || '(no title)';
+      const ts = document.createElement('span');
+      ts.className = 'history-ts';
+      ts.textContent = fmtTs(it.ts);
+      li.appendChild(type);
+      li.appendChild(title);
+      li.appendChild(ts);
+      li.addEventListener('click', () => restoreFromHistory(it));
+      listEl.appendChild(li);
+    }
+  }
+  function restoreFromHistory(it) {
+    try {
+      if (!it) return;
+      if (it.type === 'music') {
+        if (musicThemeEl) musicThemeEl.value = it.theme || '';
+        if (musicGenreEl && it.genre) musicGenreEl.value = it.genre;
+        if (musicMoodEl && it.mood) musicMoodEl.value = it.mood;
+        if (musicVocalEl && it.vocal) musicVocalEl.value = it.vocal;
+        if (musicLangEl && it.language) musicLangEl.value = it.language;
+        if (musicTempoEl && it.tempo) musicTempoEl.value = it.tempo;
+        if (musicToneEl && it.tone) musicToneEl.value = it.tone;
+        updateThemePreview();
+        updateGenreUI();
+        if (musicOutEl && it.prompt) musicOutEl.value = it.prompt;
+        // lyric ideas are not persisted; keep current
+        ensureVisible(musicOutEl || document.body);
+      } else {
+        // image or chat-finalize
+        if (rawEl && it.raw) rawEl.value = it.raw;
+        if (styleEl && it.style) styleEl.value = it.style;
+        if (moodEl && it.mood) moodEl.value = it.mood;
+        if (aspectEl && it.aspect) aspectEl.value = it.aspect;
+        if (detailEl && it.detail) detailEl.value = it.detail;
+        if (diaryStyleEl && it.diaryStyle) diaryStyleEl.value = it.diaryStyle;
+        if (titleInImageEl) titleInImageEl.checked = !!it.includeTitle;
+        updateDiaryStyleUI();
+        if (diaryEl && it.diary) diaryEl.value = it.diary;
+        if (promptEl && it.prompt) promptEl.value = it.prompt;
+        ensureVisible(diaryEl || document.body);
+      }
+    } catch (_) { /* noop */ }
   }
   function downloadText(filename, text) {
     try {
