@@ -53,6 +53,7 @@ select {
   width: 100%;
   max-width: 100%;
 }
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent-600); box-shadow: 0 0 0 2px rgba(106,164,255,0.15); }
 
 button {
   background: #1b2430;
@@ -74,14 +75,33 @@ button:hover { filter: brightness(1.05); }
 .footer { color: var(--muted); text-align: center; }
 
 /* Chat UI */
-.chat { display: grid; gap: 10px; }
-.messages { display: grid; gap: 8px; height: 320px; overflow: auto; padding: 6px; background: #0d1117; border: 1px solid var(--border); border-radius: 8px; }
-.msg { display: inline-block; max-width: 85%; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border); }
+.chat { display: grid; gap: 8px; }
+.messages { display: flex; flex-direction: column; gap: 4px; height: 320px; overflow: auto; padding: 8px 6px 14px; background: #0d1117; border: 1px solid var(--border); border-radius: 8px; }
+.msg { display: inline-block; max-width: 85%; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--border); }
+.msg { scroll-margin-bottom: 60px; }
 .msg.assistant { background: #131a22; align-self: start; }
 .msg.user { background: #172234; margin-left: auto; }
+.msg.compact { margin-top: -2px; }
 .chat-controls { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
 .chat-controls input, .chat-controls textarea { background: #0d1117; color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; max-width: 100%; }
 .chat-controls textarea { resize: none; height: 56px; min-height: 56px; max-height: 56px; }
+.ideas-row { display: grid; gap: 6px; }
+
+/* Typing effect caret */
+.msg.typing::after {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -0.2em;
+  background: currentColor;
+  animation: caret-blink 1s steps(1) infinite;
+}
+
+@keyframes caret-blink {
+  50% { opacity: 0; }
+}
 
 /* Prevent long text/URLs from causing horizontal overflow */
 .card, .msg, .hint, label, .actions { overflow-wrap: anywhere; word-break: break-word; }
@@ -90,6 +110,11 @@ button:hover { filter: brightness(1.05); }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 12px; }
 .chip { background: #1a2431; color: var(--text); border: 1px solid var(--border); border-radius: 999px; padding: 6px 10px; cursor: pointer; }
 .chip:hover { filter: brightness(1.08); }
+.chip.active { background: var(--accent); border-color: var(--accent-600); color: #0b1020; font-weight: 600; }
+.chip.ghost { background: transparent; }
+.chip.ghost.active { background: rgba(106,164,255,0.2); color: var(--text); border-color: var(--accent-600); }
+
+.input-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
 
 details summary {
   cursor: pointer;

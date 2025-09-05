@@ -60,22 +60,60 @@
       .map(([w]) => w);
   }
 
-  function generateDiary(text) {
+  function generateDiary(text, opts) {
+    const mode = (opts && opts.mode) || 'prose';
     const sentences = splitSentences(text);
     const date = formatDate();
     if (sentences.length === 0) {
+      if (mode === 'rap') {
+        return `${date}\n・静かな一日 / short memo\n・また明日 / keep it mellow`;
+      }
+      if (mode === 'essay') {
+        return `${date}\n（短いエッセイ）静かな一日。`;
+      }
       return `${date}\n今日は短いメモだけ。静かな一日。`;
     }
+    if (mode === 'essay') {
+      const title = firstLine(text);
+      const paras = [];
+      let buf = [];
+      const chunks = sentences.slice();
+      while (chunks.length) {
+        buf.push(chunks.shift());
+        if (buf.length >= 3 || chunks.length === 0) {
+          const para = buf.join('。') + '。';
+          paras.push(para);
+          buf = [];
+        }
+      }
+      return `${date}\n${title}\n\n${paras.join('\n\n')}`;
+    }
+    if (mode === 'rap') {
+      // Rap-like compact lines: split into short chunks and join with slashes
+      const lines = sentences.map(s => {
+        const parts = s
+          .replace(/[。！？!？]/g, ' ')
+          .split(/[、,\s]+/)
+          .map(x => x.trim())
+          .filter(Boolean)
+          .slice(0, 3);
+        return '・' + (parts.join(' / ') || s);
+      });
+      // Add a tone-based hook line
+      const tone = detectTone(text);
+      const hint = toneHints(tone).jp.replace(/、.*/, '');
+      lines.push(`・hook: ${hint}`);
+      return `${date}\n${lines.join('\n')}`;
+    }
+    // prose (default)
     const first = sentences[0];
     const middle = sentences.slice(1, -1);
     const last = sentences[sentences.length - 1] || '';
-
     const body = [
       `【今日の出来事】${first}。`,
       ...(middle.length ? middle.map(s => `・${s}。`) : []),
       last ? `【気づき/感情】${last}。` : '',
     ].filter(Boolean).join('\n');
-
     return `${date}\n${body}`;
   }
 

@@ -119,6 +119,44 @@
     }
   }
 
+  function themeToEnglish(input) {
+    const s = (input || '').trim();
+    if (!s) return '';
+    // If already ASCII-heavy, keep as-is
+    const asciiRatio = s.replace(/[^\x00-\x7F]/g, '').length / s.length;
+    if (asciiRatio > 0.8) return s; // likely English
+    // Minimal JP->EN keyword mapping (fallbacks)
+    const map = [
+      { re: /日常|毎日|普段/g, kw: 'everyday life' },
+      { re: /都会|街|都市|シティ|街角|交差点/g, kw: 'city' },
+      { re: /余韻|アフターグロウ|残光/g, kw: 'afterglow' },
+      { re: /夜|夜景|深夜|真夜中/g, kw: 'night' },
+      { re: /雨|小雨|雨上がり|梅雨/g, kw: 'rain' },
+      { re: /夕方|夕暮れ|黄昏/g, kw: 'sunset' },
+      { re: /朝|朝焼け|朝日/g, kw: 'morning' },
+      { re: /海|海辺|浜辺|波/g, kw: 'ocean' },
+      { re: /旅|旅行|車窓|列車|電車/g, kw: 'travel' },
+      { re: /孤独|ひとり|寂しさ/g, kw: 'loneliness' },
+      { re: /週末|休日/g, kw: 'weekend' },
+      { re: /春/g, kw: 'spring' },
+      { re: /夏/g, kw: 'summer' },
+      { re: /秋/g, kw: 'autumn' },
+      { re: /冬/g, kw: 'winter' },
+      { re: /恋|恋愛|愛/g, kw: 'love' },
+      { re: /公園|並木|桜|彼岸花/g, kw: 'park' },
+      { re: /静けさ|静か|穏やか/g, kw: 'calm' },
+      { re: /ノスタルジ|懐かし|郷愁/g, kw: 'nostalgia' },
+      { re: /都会の夜|夜の街/g, kw: 'city night' },
+      { re: /帰り道/g, kw: 'way home' },
+    ];
+    const found = [];
+    for (const m of map) {
+      if (m.re.test(s)) found.push(m.kw);
+    }
+    const uniq = Array.from(new Set(found));
+    return uniq.join(' / ');
+  }
+
   function buildMusicPrompt({ theme = '', mood = 'nostalgic', genre = 'citypop', vocal = 'sing', language = 'ja', tempo = 'mid', tone = 'introspective' }) {
     const g = GENRES[genre] || GENRES.citypop;
     const m = moodText(mood);
@@ -128,31 +166,42 @@
     const tn = toneText(tone);
     const structure = structureFor(vocal);
 
-    const jp = [
-      `ジャンル: ${g.jp}（${g.instr}）`,
-      `雰囲気: ${m.jp}`,
-      `テンポ: ${tp.jp}（目安BPM: ${g.bpm}）`,
-      `ボーカル: ${v.jp}`,
-      `言語: ${l.jp}`,
-      `歌詞トーン: ${tn.jp}`,
-      `テーマ: ${theme || '日常 / 都会 / 余韻'}`,
-      `構成: ${structure}`,
-      `ミックス: ボーカル前面、楽器は歌を支える。過度な歪みを避け、明瞭さ重視。`,
+    // Compact, single-line, English-leaning prompt (as requested)
+    // Example target:
+    // "Lo-fi Hip Hop, dusty drums, warm tape, jazzy chords, vinyl crackle, quiet atmosphere, medium tempo (BPM 70-90), Japanese rap, introspective tone, theme: everyday life / city / afterglow, structure: intro, verse (rap), pre-chorus, chorus"
+    const genreLabel = g.jp; // nicely cased (e.g., "Lo-fi Hip Hop")
+    const instrParts = String(g.instr || '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean);
+    const moodPhrase = (m.en === 'calm') ? 'quiet atmosphere' : `${m.en} atmosphere`;
+    const tempoWord = (tp.en === 'mid') ? 'medium' : tp.en; // defensive; tp.en usually 'medium'
+    const tempoPhrase = `${tempoWord} tempo (BPM ${g.bpm})`;
+    // Language + vocal phrasing
+    const langWord = (language === 'ja') ? 'Japanese' : (language === 'en' ? 'English' : 'Japanese-English');
+    let vocalLangPhrase = langWord;
+    if (vocal === 'rap') vocalLangPhrase += ' rap';
+    else if (vocal === 'both') vocalLangPhrase += ' singing + rap';
+    else vocalLangPhrase += ' singing';
+    const tonePhrase = `${tn.en} tone`;
+    const themeText = themeToEnglish(theme) || 'everyday life / city / afterglow';
+    // Short structure for readability in compact line
+    let structureShort = 'intro, verse, pre-chorus, chorus';
+    if (vocal === 'rap') structureShort = 'intro, verse (rap), pre-chorus, chorus';
+    if (vocal === 'both') structureShort = 'intro, verse (rap), pre-chorus, chorus';
+
+    const compact = [
+      genreLabel,
+      ...instrParts,
+      moodPhrase,
+      tempoPhrase,
+      vocalLangPhrase,
+      tonePhrase,
+      `theme: ${themeText}`,
+      `structure: ${structureShort}`,
     ].join(', ');
 
-    const en = [
-      `genre: ${g.en} (${g.instr})`,
-      `mood: ${m.en}`,
-      `tempo: ${tp.en} (bpm guide: ${g.bpm})`,
-      `vocal: ${v.en}`,
-      `language: ${l.en}`,
-      `lyric tone: ${tn.en}`,
-      `theme: ${theme || 'everyday / city / afterglow'}`,
-      `structure: ${structure}`,
-      `mix: vocals forward; instruments supportive; avoid harsh distortion; keep clarity.`,
-    ].join(', ');
-
-    return { prompt: `${jp}\n-- ${en}`, ideas: lyricIdeas({ theme, mood, vocal, lang: language }), toneLabel: tn };
+    return { prompt: compact, ideas: lyricIdeas({ theme, mood, vocal, lang: language }), toneLabel: tn };
   }
 
   function addGenre(key, data) {
@@ -167,5 +216,5 @@
     return GENRES[k];
   }
 
-  global.MusicPrompt = { buildMusicPrompt, GENRES, addGenre };
+  global.MusicPrompt = { buildMusicPrompt, GENRES, addGenre, themeToEnglish };
 })(window);

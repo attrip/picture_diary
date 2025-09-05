@@ -45,6 +45,7 @@
             <select id="chatMode">
               <option value="essay" selected>エッセイ</option>
               <option value="diary">日記</option>
+              <option value="rap">ラップ</option>
             </select>
           </div>
         </div>
@@ -54,7 +55,15 @@
             <textarea id="chatInput" rows="2" placeholder="ここに返信を入力（Enterで改行、Ctrl/⌘+Enterで送信）"></textarea>
             <button id="chatSend">送信</button>
           </div>
+          <div class="ideas-row">
+            <small class="hint">アイデアに迷ったら：下の候補をクリック</small>
+            <div class="chips" id="chatIdeas"></div>
+            <div class="actions" style="margin:4px 0 0;">
+              <button id="chatIdeasRefresh" type="button">アイデアを更新</button>
+            </div>
+          </div>
           <div class="actions">
+            <button id="chatSkip">スキップ</button>
             <button id="chatUndo">取り消し</button>
             <button id="chatRestart">やり直す</button>
             <button id="chatFinalize" class="primary">まとめて生成</button>
@@ -119,6 +128,19 @@
               <option value="high">高精細</option>
             </select>
           </div>
+          <div class="field">
+            <label for="diaryStyle">整形スタイル</label>
+            <select id="diaryStyle">
+              <option value="prose" selected>通常（文章）</option>
+              <option value="essay">エッセイ風</option>
+              <option value="rap">ラップ風</option>
+            </select>
+            <div class="chips" id="diaryStyleChips">
+              <button type="button" class="chip" data-diary-style="prose">文章</button>
+              <button type="button" class="chip" data-diary-style="essay">エッセイ</button>
+              <button type="button" class="chip" data-diary-style="rap">ラップ</button>
+            </div>
+          </div>
           <div class="field" style="min-width: 260px; align-self: end;">
             <label for="titleInImage">画像内の文字</label>
             <label style="display:flex; gap:8px; align-items:center;">
@@ -133,9 +155,16 @@
 
       <section class="card">
         <h2>日記（自動整形）</h2>
+        <div class="chips" id="diaryStyleChips2" aria-label="整形スタイル">
+          <button type="button" class="chip" data-diary-style="prose">文章</button>
+          <button type="button" class="chip" data-diary-style="essay">エッセイ</button>
+          <button type="button" class="chip" data-diary-style="rap">ラップ</button>
+        </div>
         <textarea id="diaryOut" rows="10" readonly></textarea>
         <div class="actions">
           <button data-copy="#diaryOut">コピー</button>
+          <button data-open="chatgpt" data-source="#diaryOut">ChatGPTで開く</button>
+          <button data-open="gemini" data-source="#diaryOut">Geminiで開く</button>
         </div>
       </section>
 
@@ -153,9 +182,23 @@
       <section class="card">
         <h2>音楽プロンプト（Suno風）</h2>
         <div class="row">
-          <div class="field">
-            <label for="musicTheme">テーマ</label>
-            <input id="musicTheme" type="text" placeholder="例：雨上がりの帰り道、都会の孤独、週末の夜" />
+          <div class="field" id="musicThemeGroup" style="min-width:280px">
+            <label for="musicTheme">テーマ（短く・名詞で）</label>
+            <div class="input-row">
+              <input id="musicTheme" type="text" placeholder="例：雨上がり / 都会の夜 / 帰り道" />
+              <button id="musicThemeClear" type="button" aria-label="テーマをクリア">クリア</button>
+            </div>
+            <div class="chips" id="musicThemeChips" aria-label="テーマ候補">
+              <button type="button" class="chip ghost" data-theme="日常">日常</button>
+              <button type="button" class="chip ghost" data-theme="都会">都会</button>
+              <button type="button" class="chip ghost" data-theme="帰り道">帰り道</button>
+              <button type="button" class="chip ghost" data-theme="夜散歩">夜散歩</button>
+              <button type="button" class="chip ghost" data-theme="雨上がり">雨上がり</button>
+              <button type="button" class="chip ghost" data-theme="孤独">孤独</button>
+              <button type="button" class="chip ghost" data-theme="余韻">余韻</button>
+            </div>
+            <small id="musicThemePreview" class="hint">English keywords: everyday life / city / afterglow</small>
+            <small class="hint">日本語入力OK（プロンプトは英語で出力）</small>
           </div>
           <div class="field">
             <label for="musicGenre">ジャンル</label>
@@ -253,9 +296,11 @@
             <div class="field"><label for="presetInstr">楽器/質感</label><input id="presetInstr" type="text" placeholder="例: detuned saws, glossy leads, clipped drums" /></div>
             <div class="field"><label for="presetBpm">BPM目安</label><input id="presetBpm" type="text" placeholder="例: 150-180" /></div>
           </div>
-          <button id="presetAddBtn">追加</button>
+          <button id="presetAddBtn" type="button">追加</button>
+          <p class="hint">キーは英字で。スペースは自動でハイフンに変換（例: "future bass" → "future-bass"）。</p>
         </details>
         <button id="musicGenerate" class="primary">音楽プロンプトを生成</button>
+        <p class="hint">出力は英語のみ。言語設定は歌詞アイデアの言語に適用されます。</p>
         <h3 style="margin:12px 0 6px;">音楽プロンプト</h3>
         <textarea id="musicOut" rows="8" readonly></textarea>
         <div class="actions">
@@ -273,8 +318,19 @@
       <small>© Picture Diary</small>
     </footer>
 
+    <section class="container card" style="margin-top:12px;">
+      <h2>履歴</h2>
+      <p class="hint">この端末のブラウザに自動保存されます（最大500件）。</p>
+      <div class="actions">
+        <button id="historyExport" type="button">エクスポート（JSON）</button>
+        <button id="historyClear" type="button">履歴を消去</button>
+      </div>
+      <small id="historyCount" class="hint"></small>
+    </section>
+
     <script src="./lib/prompt.js"></script>
     <script src="./lib/music.js"></script>
+    <script src="./lib/log.js"></script>
     <script src="./app/main.js"></script>
   </body>
   </html>
