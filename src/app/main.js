@@ -93,6 +93,7 @@
   const chatRestart = $('#chatRestart');
   const chatUndo = $('#chatUndo');
   const chatModeEl = $('#chatMode');
+  const chatEnterToSendEl = $('#chatEnterToSend');
 
   function copyFrom(selector) {
     const el = document.querySelector(selector);
@@ -483,7 +484,15 @@
     // Ignore while IME composing (Japanese input, etc.)
     if (e.isComposing || composing) return;
     const isCtrlEnter = (e.ctrlKey || e.metaKey) && e.key === 'Enter';
+    const isEnter = e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.shiftKey;
+    const enterToSend = chatEnterToSendEl && chatEnterToSendEl.checked;
+
     if (isCtrlEnter) {
+      e.preventDefault();
+      handleUserInput();
+      return;
+    }
+    if (enterToSend && isEnter) {
       e.preventDefault();
       handleUserInput();
       return;

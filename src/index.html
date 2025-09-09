@@ -62,6 +62,12 @@
             <textarea id="chatInput" rows="2" placeholder="ここに返信を入力（Enterで改行、Ctrl/⌘+Enterで送信）"></textarea>
             <button id="chatSend">送信</button>
           </div>
+          <div class="actions" style="margin-top: 4px; justify-content: flex-end;">
+            <label style="display:flex; gap:8px; align-items:center; cursor:pointer; font-size: 0.9em;">
+              <input id="chatEnterToSend" type="checkbox" />
+              <span>Enterで送信</span>
+            </label>
+          </div>
           <div class="ideas-row">
             <small class="hint">アイデアに迷ったら：下の候補をクリック</small>
             <div class="chips" id="chatIdeas"></div>
