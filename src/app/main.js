@@ -334,6 +334,7 @@
     const mode = chatModeEl ? chatModeEl.value : 'essay';
     if (mode === 'diary') return diarySteps;
     if (mode === 'rap') return rapSteps;
+    if (mode === 'memo') return []; // No steps for memo
     return essaySteps;
   }
 
@@ -370,6 +371,22 @@
     chatInput.value = '';
     chatFinalize.disabled = true;
     const mode = chatModeEl ? chatModeEl.value : 'essay';
+
+    // Show/hide buttons based on mode
+    const isMemoMode = mode === 'memo';
+    if (chatSkip) chatSkip.style.display = isMemoMode ? 'none' : '';
+    if (chatUndo) chatUndo.style.display = isMemoMode ? 'none' : '';
+    if (chatIdeas) chatIdeas.style.display = isMemoMode ? 'none' : '';
+    if (chatIdeasRefresh) chatIdeasRefresh.style.display = isMemoMode ? 'none' : '';
+    if (chatFinalize) chatFinalize.style.display = isMemoMode ? 'none' : '';
+
+    if (isMemoMode) {
+      addMsg('メモをどうぞ。入力内容は下に自動で反映されます。', 'assistant');
+      chatInput.placeholder = 'ここにメモを入力（Ctrl/⌘+Enterで送信）';
+      rawEl.value = ''; // Clear raw text area for new memo session
+      return;
+    }
+
     const intro = mode === 'diary'
       ? '日記作成を手伝います。いくつか質問しますね。'
       : mode === 'rap'
@@ -386,6 +403,15 @@
     if (composing) return; // avoid sending mid-IME composition
     let v = (chatInput.value || '').replace(/\s+$/g, '');
     if (!v) return;
+
+    const mode = chatModeEl ? chatModeEl.value : 'essay';
+    if (mode === 'memo') {
+      addMsg(v, 'user');
+      rawEl.value += v + '\n';
+      chatInput.value = '';
+      return;
+    }
+
     sending = true;
     addMsg(v, 'user');
     const steps = state.phase === 'main' ? currentSteps() : refineSteps;
@@ -394,7 +420,7 @@
     chatInput.value = '';
     state.i += 1;
     // Live compose into raw input
-    rawEl.value = composeRawFromAnswers(state.answers, chatModeEl ? chatModeEl.value : 'essay');
+    rawEl.value = composeRawFromAnswers(state.answers, mode);
     ask();
     // Ensure caret reset and state released
     chatInput.blur();
@@ -438,6 +464,7 @@
   }
 
   function composeRawFromAnswers(a, mode) {
+    if (mode === 'memo') return rawEl.value; // In memo mode, rawEl is the source of truth
     if (mode === 'diary') {
       const parts = [];
       if (a.time || a.weather) parts.push(`${a.time || ''}、${a.weather || ''}`.replace(/^[、]+|、{2,}/g, ''));
