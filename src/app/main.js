@@ -545,6 +545,7 @@
     // Log chat finalize as image prompt with answers
     try {
       PDLog && PDLog.add('chat-finalize', {
+        raw,
         answers: state && state.answers,
         mode: chatModeEl && chatModeEl.value,
         diaryStyle: (diaryStyleEl && diaryStyleEl.value) || 'prose',
@@ -974,7 +975,12 @@
       type.textContent = it.type === 'music' ? 'music' : (it.type === 'chat-finalize' ? 'chat' : 'image');
       const title = document.createElement('div');
       title.className = 'history-title';
-      const line = firstLineOf(it.diary || it.prompt || it.raw || it.theme || '');
+      let line = '(no title)';
+      if (it.type === 'music') {
+        line = firstLineOf(it.theme || it.prompt || '');
+      } else {
+        line = firstLineOf(it.raw || it.diary || it.prompt || '');
+      }
       title.textContent = line || '(no title)';
       const ts = document.createElement('span');
       ts.className = 'history-ts';
