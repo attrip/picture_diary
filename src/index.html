@@ -32,8 +32,13 @@
   </head>
   <body>
     <header class="container">
-      <h1>Picture Diary</h1>
-      <p class="sub">テキストを日記に整形し、絵を作るためのプロンプトを生成します。</p>
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <h1>Picture Diary</h1>
+          <p class="sub">テキストを日記に整形し、絵を作るためのプロンプトを生成します。</p>
+        </div>
+        <button id="theme-toggle" type="button" title="テーマを切り替え" style="font-size: 24px; background: transparent; border: none; cursor: pointer; padding: 0; margin-top: 12px; color: var(--text);">☀️</button>
+      </div>
       <nav class="steps" aria-label="作成ステップ">
         <ol>
           <li id="step-input" aria-current="step">1. 入力</li>

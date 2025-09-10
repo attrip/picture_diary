@@ -159,3 +159,43 @@ details summary {
   color: var(--muted);
 }
 details[open] summary { color: var(--text); }
+
+/* Light Mode */
+body[data-theme='light'] {
+  --bg: #f0f2f5;
+  --panel: #ffffff;
+  --text: #1c1e21;
+  --muted: #606770;
+  --accent: #0d6efd;
+  --accent-600: #0b5ed7;
+  --border: #dee2e6;
+  --success: #198754;
+  --success-600: #146c43;
+}
+
+body[data-theme='light'] .steps li { background: #fff; border-color: #ced0d4; }
+body[data-theme='light'] .steps li[aria-current="step"] { color: #fff; background: var(--accent); border-color: var(--accent-600); }
+body[data-theme='light'] textarea,
+body[data-theme='light'] select,
+body[data-theme='light'] .chat-controls input,
+body[data-theme='light'] .chat-controls textarea,
+body[data-theme='light'] .messages,
+body[data-theme='light'] .history-item {
+  background: #fff;
+}
+body[data-theme='light'] input:focus, 
+body[data-theme='light'] textarea:focus, 
+body[data-theme='light'] select:focus {
+  box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.15);
+}
+body[data-theme='light'] button { background-color: #fff; border-color: #ced0d4; color: #1c1e21; }
+body[data-theme='light'] button:hover { background-color: #f0f2f5; }
+body[data-theme='light'] button.primary { background-color: var(--accent); border-color: var(--accent-600); color: #fff; }
+body[data-theme='light'] .copied { background-color: var(--success); border-color: var(--success-600); color: #fff; }
+body[data-theme='light'] .msg.assistant { background: #e9ecef; }
+body[data-theme='light'] .msg.user { background: #cfe2ff; }
+body[data-theme='light'] .chip { background-color: #fff; border-color: #ced0d4; color: #1c1e21; }
+body[data-theme='light'] .chip:hover { background-color: #f0f2f5; }
+body[data-theme='light'] .chip.active { background-color: var(--accent); border-color: var(--accent-600); color: #fff; }
+body[data-theme='light'] .chip.ghost.active { background: rgba(13, 110, 253, 0.1); border-color: var(--accent-600); }
+body[data-theme='light'] #toast { background: #343a40; color: #fff; border-color: #495057; }

@@ -1059,4 +1059,50 @@
   } else {
     ensurePngIcons();
   }
+
+  // --- Theme (Dark/Light Mode) ---
+  const themeToggle = document.getElementById('theme-toggle');
+  const THEME_KEY = 'picture-diary-theme';
+
+  function applyTheme(theme) {
+    // Set theme on body
+    document.body.dataset.theme = theme;
+    // Update button icon
+    if (themeToggle) {
+      themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
+    }
+    // Update meta theme-color for mobile address bar
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.content = theme === 'light' ? '#f0f2f5' : '#0f1216';
+    }
+  }
+
+  function toggleTheme() {
+    const currentTheme = document.body.dataset.theme || 'dark';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    applyTheme(newTheme);
+    try {
+      localStorage.setItem(THEME_KEY, newTheme);
+    } catch (_) { /* noop */ }
+  }
+
+  function initTheme() {
+    let savedTheme;
+    try {
+      savedTheme = localStorage.getItem(THEME_KEY);
+    } catch (_) { /* noop */ }
+    
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const defaultTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+    
+    applyTheme(defaultTheme);
+  }
+
+  if (themeToggle) {
+    themeToggle.addEventListener('click', toggleTheme);
+  }
+
+  // Initialize theme on load
+  initTheme();
 })();

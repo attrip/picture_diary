@@ -13,3 +13,7 @@ dist/
 # Env
 .env.local
 .env
+
+# Local server
+.server_pid
+server.log
