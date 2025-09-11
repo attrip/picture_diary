@@ -142,6 +142,11 @@
           jp: '1980年代のレトロフューチャー、SFアニメ調、メカ/カセット・フューチャリズム、VHSスクリーン感',
           en: 'nanabanana, 80s retro anime style, retro future, mecha, cassette futurism, vhs screen',
         };
+      case 'retro_anime_showa':
+        return {
+          jp: 'レトロアニメ／昭和アニメ調のカラーリング。クリーンな線画、フラットなセル塗り、落ち着いたレトロ配色、暖かい室内光、穏やかで集中した雰囲気、日本アニメ美学。シネマティックでドラマチックな照明、感情的な光の効果、リムライト、ボリューメトリックライト、ドラマチックな影、ゴッドレイ',
+          en: 'nanabanana, anime-style illustration of [scene/action], clean line art, flat cel shading, retro muted colors, warm indoor lighting, calm and focused atmosphere, Japanese animation aesthetic, cinematic dramatic lighting, emotional light effects, rim light, volumetric light, dramatic shadows, god rays',
+        };
       case 'minimal_line_art':
         return {
           jp: '繊細な線の魅力に焦点、ミニマルで洗練されたモノクローム、余白を活かす',
