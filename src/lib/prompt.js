@@ -216,31 +216,8 @@
     const toneHint = toneHints(tone);
     const detailHint = detailPreset(detail);
     const moodHint = moodPreset(mood);
-    const title = firstLine(diary || rawText);
 
-    const ratio = aspect; // consumer tool interprets
-
-    const jpTextPolicy = includeTitle
-      ? `文字はイメージ作成の参考情報。基本は描かない。必要な場合のみ、ごく小さなタイトルを許可（簡素・控えめ）。その他の文字・字幕・透かし・ロゴは描かない`
-      : `文字はイメージ作成の参考情報であり、画像内には描かない（字幕・透かし・ロゴ・英字も不可）`;
-
-    const enTextPolicy = includeTitle
-      ? `treat text as conceptual guidance only. prefer no text. if absolutely needed, allow a tiny, subtle title only; no other text, captions, subtitles, watermarks, logos, letters`
-      : `text is guidance only; do not render any text in the image (no captions, subtitles, watermarks, logos, letters)`;
-
-    const subjectJp = kws.slice(0, 4).join('、');
-    const subjectEn = kws.slice(0, 4).join(', ');
-
-    const jp = [
-      `日記の一場面を描く: ${kws.slice(0, 6).join('、')}`,
-      `情景: ${moodHint.jp}（${toneHint.jp}）`,
-      `スタイル: ${preset.jp}`,
-      `構図: 自然で読みやすいレイアウト、主要被写体を中央付近に`,
-      `質感: ${detail === 'high' ? '精密な質感、繊細な陰影' : detail === 'simple' ? '簡潔な質感、フラットな陰影' : '程よい質感、柔らかな陰影'}`,
-      jpTextPolicy,
-      `アスペクト比: ${ratio}`,
-      subjectJp ? `被写体: ${subjectJp}` : '',
-    ].filter(Boolean).join(' / ');
+    const ratio = aspect;
 
     const en = [
       `scene from a diary: ${kws.slice(0, 6).join(', ')}`,
@@ -248,13 +225,35 @@
       `${moodHint.en} (${toneHint.en})`,
       `composition: readable layout, main subject near center`,
       `${detailHint}`,
-      `${enTextPolicy}`,
       `aspect: ${ratio}`,
       `high quality, sharp focus, coherent anatomy, consistent lighting`,
-      subjectEn ? `subject: ${subjectEn}` : '',
     ].join(' / ');
 
-    const prompt = `${jp} \n-- ${en}`;
+    const prompt = [
+      '以下の日記の内容を元に、最も印象的な場面を想像して、感情が伝わるような画像を1枚作成してください。',
+      '文章はイメージ作成の参考情報であり、画像内に文字（字幕・透かし・ロゴ・英字）は描かないでください。',
+      '',
+      '【日記】',
+      diary,
+      '',
+      '【画像のスタイル・雰囲気】',
+      '',
+      `スタイル: ${preset.jp}`,
+      '',
+      `雰囲気: ${moodHint.jp}（${toneHint.jp}）`,
+      '',
+      '構図: 自然で読みやすいレイアウトで、日記の主題が伝わるように。',
+      '',
+      `アスペクト比: ${ratio}`,
+      '',
+      `質感: ${detail === 'high' ? '精密な質感、繊細な陰影' : detail === 'simple' ? '簡潔な質感、フラットな陰影' : '程よい質感、柔らかな陰影'}`,
+      '',
+      '高品質で、焦点が合い、照明が一貫していること',
+      '',
+      '【生成の指示】',
+      en,
+    ].join('\n');
+
     return { prompt, tone, keywords: kws, diary };
   }
 
