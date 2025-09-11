@@ -99,75 +99,78 @@
           .slice(0, 3);
         return '・' + (parts.join(' / ') || s);
       });
-      // Add a tone-based hook line
-      const tone = detectTone(text);
-      const hint = toneHints(tone).jp.replace(/、.*/, '');
-      lines.push(`・hook: ${hint}`);
+      // ラップでは自動フック行は追加しない（ユーザー入力のみ反映）
       return `${date}\n${lines.join('\n')}`;
     }
     // prose (default)
     const first = sentences[0];
     const middle = sentences.slice(1, -1);
     const last = sentences[sentences.length - 1] || '';
+    const includeInsight = sentences.length >= 2 && typeof last === 'string' && last.trim().length >= 2 && last !== first;
     const body = [
       `【今日の出来事】${first}。`,
       ...(middle.length ? middle.map(s => `・${s}。`) : []),
-      last ? `【気づき/感情】${last}。` : '',
+      includeInsight ? `【気づき/感情】${last}。` : '',
     ].filter(Boolean).join('\n');
     return `${date}\n${body}`;
   }
 
   function stylePreset(style) {
     switch (style) {
-      case 'ukiyoe':
+      case 'cinematic_lighting':
         return {
-          jp: '[描きたいもの]の浮世絵、歌川広重風、大胆な構図と美しいぼかし、哀愁漂う雰囲気',
-          en: 'Ukiyo-e of [subject], Hiroshige Utagawa style, bold composition and beautiful blurring, melancholic atmosphere',
+          jp: '映画のような劇的で感情的な照明効果、リムライト、ボリューメトリックライト、ドラマチックな影、ゴッドレイ',
+          en: 'nanabanana, cinematic lighting, rim light, volumetric lighting, dramatic shadows, god rays',
         };
-      case 'photoreal-portrait':
+      case 'artist_fusion':
         return {
-          jp: '[人物の説明]の超リアルなポートレート、[感情や表情]、スタジオ照明、背景は[色]の無地、髪の毛一本一本まで鮮明',
-          en: 'Ultra-realistic portrait of [person description], [emotion/expression], studio lighting, solid [color] background, every single hair is clear',
+          jp: '著名アーティストの作風を掛け合わせたフュージョンスタイル（好みの作家名を追加可能）',
+          en: 'nanabanana, by Ilya Kuvshinov, by Range Murata, by James Jean, by Yoshitaka Amano',
         };
-      case 'anime-character':
+      case 'nostalgic_film':
         return {
-          jp: '[キャラクターの説明]、人気アニメ映画風の壮大なイラスト、[感情]を表現する表情、[背景]、デジタルペインティング',
-          en: '[Character description], epic illustration in the style of a popular anime movie, facial expression that expresses [emotion], [background], digital painting',
+          jp: 'フィルム写真のような少し色褪せたノスタルジックな空気、光漏れや粒状感、エモーショナル',
+          en: 'nanabanana, nostalgic film photo, light leaks, grainy, summer memories, cinematic',
         };
-      case 'impasto-oil':
+      case 'ukiyoe_pop':
         return {
-          jp: '[描きたいもの]の厚塗りの油絵、レンブラント風の劇的な光と影、重厚な色彩、クラシックな雰囲気',
-          en: 'Impasto oil painting of [subject], dramatic light and shadow in the style of Rembrandt, deep colors, classic atmosphere',
+          jp: '浮世絵の木版画表現と現代的なキャラクターデザインの融合、太い輪郭と大胆な配色',
+          en: 'nanabanana, Ukiyo-e style, woodblock print, Hokusai style, Japanese print, bold outlines',
         };
-      case 'retro-film':
+      case 'retro_future_80s':
         return {
-          jp: '[被写体]を写した80年代の日本のフィルム写真風、少しノイズの入った質感、温かみのある色合い、ノスタルジックな夏の日の雰囲気',
-          en: '80s Japanese film style photo of [subject], slightly noisy texture, warm colors, nostalgic summer day atmosphere',
+          jp: '1980年代のレトロフューチャー、SFアニメ調、メカ/カセット・フューチャリズム、VHSスクリーン感',
+          en: 'nanabanana, 80s retro anime style, retro future, mecha, cassette futurism, vhs screen',
         };
-      case 'detailed-pen':
+      case 'retro_anime_showa':
         return {
-          jp: '[描きたいもの]の非常に詳細なペン画、銅版画風の繊細な線、アンティークな雰囲気、イラストレーション',
-          en: 'Very detailed pen drawing of [subject], delicate lines in the style of a copperplate engraving, antique atmosphere, illustration',
+          jp: 'レトロアニメ／昭和アニメ調のカラーリング。クリーンな線画、フラットなセル塗り、落ち着いたレトロ配色、暖かい室内光、穏やかで集中した雰囲気、日本アニメ美学。シネマティックでドラマチックな照明、感情的な光の効果、リムライト、ボリューメトリックライト、ドラマチックな影、ゴッドレイ',
+          en: 'nanabanana, anime-style illustration of [scene/action], clean line art, flat cel shading, retro muted colors, warm indoor lighting, calm and focused atmosphere, Japanese animation aesthetic, cinematic dramatic lighting, emotional light effects, rim light, volumetric light, dramatic shadows, god rays',
         };
-      case '3d-character':
+      case 'minimal_line_art':
         return {
-          jp: '[キャラクターの説明]、高品質な3Dキャラクターモデル、トゥーンレンダリング、生き生きとした表情、明るいライティング',
-          en: '[Character description], high-quality 3D character model, toon rendering, lively expression, bright lighting',
+          jp: '繊細な線の魅力に焦点、ミニマルで洗練されたモノクローム、余白を活かす',
+          en: 'nanabanana, minimalist, line art, clean, monochromatic, empty space, delicate',
         };
-      case 'pop-art':
+      case 'watercolor_ink':
         return {
-          jp: '[描きたいもの]のポップアート、鮮やかなシルクスクリーン風、大胆な色彩の反復、グラフィカルなデザイン',
-          en: 'Pop art of [subject], vivid silkscreen style, bold color repetition, graphical design',
+          jp: '水彩のにじみとインク（墨）の筆致、線と淡い彩色のコンビネーション（線とウォッシュ）',
+          en: 'nanabanana, watercolor, ink wash painting, sumi-e, rough sketch, line and wash',
         };
-      case 'steampunk':
+      case 'impasto_concept':
         return {
-          jp: '[描きたいもの]のスチームパンク風イラスト、歯車と真鍮の装飾、緻密なメカニカルデザイン、ヴィクトリア朝の雰囲気、セピア調の色合い',
-          en: 'Steampunk illustration of [subject], gears and brass decoration, intricate mechanical design, Victorian atmosphere, sepia tones',
+          jp: '厚塗り・コンセプトアート風。油絵の重厚感、筆致やパレットナイフの質感を残す',
+          en: 'nanabanana, impasto, oil painting style, thick brush strokes, palette knife, concept art',
         };
-      case 'minimalist-line-art':
+      case 'double_exposure':
         return {
-          jp: '[描きたいもの]のミニマリストなラインアート、一筆書き風、シンプルな線、白背景、洗練されたデザイン',
-          en: 'Minimalist line art of [subject], one-stroke style, simple lines, white background, sophisticated design',
+          jp: 'ダブルエクスポージャー。シルエット内に風景やパターンを重ねて内面や心情を象徴的に表現',
+          en: 'nanabanana, double exposure, silhouette, superimposed, nature pattern, cityscape',
+        };
+      case 'abstract_expressionism':
+        return {
+          jp: '抽象表現主義。ドリッピングや激しい筆致、具象と抽象の共存、カオティックでエネルギッシュ',
+          en: 'nanabanana, abstract expressionism, action painting, Jackson Pollock style, paint splatter, dynamic brushstrokes, chaotic energy',
         };
       default:
         return { jp: '', en: '' };
@@ -229,53 +232,32 @@
     return sents[0] || '';
   }
 
-  function buildImagePrompt({ rawText, diary, style = 'watercolor', mood = 'calm', aspect = '1:1', detail = 'balanced', includeTitle = true }) {
+  function buildImagePrompt({ rawText, diary, style = 'cinematic_lighting', mood = 'calm', aspect = '1:1', detail = 'balanced', includeTitle = true }) {
     const tone = detectTone(rawText);
     const kws = extractKeywords(rawText, 12);
-    let preset = stylePreset(style);
+    const preset = stylePreset(style);
     const toneHint = toneHints(tone);
     const detailHint = detailPreset(detail);
     const moodHint = moodPreset(mood);
-
-    const subject = kws.slice(0, 6).join('、');
-    const personDescription = kws.slice(0, 6).join('、');
-    const characterDescription = kws.slice(0, 6).join('、');
-    const emotion = moodHint.jp;
-    const color = '無地';
-    const background = 'シンプルな背景';
-
-    preset.jp = preset.jp.replace(/\[描きたいもの\]/g, subject);
-    preset.jp = preset.jp.replace(/\ \[人物の説明\]/g, personDescription);
-    preset.jp = preset.jp.replace(/\ \[感情や表情\]/g, emotion);
-    preset.jp = preset.jp.replace(/\ \[色\]/g, color);
-    preset.jp = preset.jp.replace(/\ \[キャラクターの説明\]/g, characterDescription);
-    preset.jp = preset.jp.replace(/\ \[感情\]/g, emotion);
-    preset.jp = preset.jp.replace(/\ \[背景\]/g, background);
-    preset.jp = preset.jp.replace(/\ \[被写体\]/g, subject);
-
-    preset.en = preset.en.replace(/\ \[subject\]/g, kws.slice(0, 6).join(', '));
-    preset.en = preset.en.replace(/\ \[person description\]/g, kws.slice(0, 6).join(', '));
-    preset.en = preset.en.replace(/\ \[emotion\/expression\]/g, moodHint.en);
-    preset.en = preset.en.replace(/\ \[color\]/g, 'solid');
-    preset.en = preset.en.replace(/\ \[character description\]/g, kws.slice(0, 6).join(', '));
-    preset.en = preset.en.replace(/\ \[emotion\]/g, moodHint.en);
-    preset.en = preset.en.replace(/\ \[background\]/g, 'simple background');
 
     const ratio = aspect;
 
     const en = [
       `scene from a diary: ${kws.slice(0, 6).join(', ')}`,
+      `render one emotionally striking key moment inferred from the text`,
       `${preset.en}`,
       `${moodHint.en} (${toneHint.en})`,
       `composition: readable layout, main subject near center`,
       `${detailHint}`,
       `aspect: ${ratio}`,
+      `no text/letters/logos/watermarks in the image`,
       `high quality, sharp focus, coherent anatomy, consistent lighting`,
     ].join(' / ');
 
     const prompt = [
-      '以下の日記の内容を元に、最も印象的な場面を想像して、感情が伝わるような画像を1枚作成してください。',
-      '文章はイメージ作成の参考情報であり、画像内に文字（字幕・透かし・ロゴ・英字）は描かないでください。',
+      '以下の文章（短い日記/メモ）を読み、内容から情景を想像して「最も印象的な一場面」を1枚の画像として描いてください。',
+      '文章はキーワードの羅列ではなく、イメージ構築の手がかりです。主題に焦点を当て、不要な要素は省略して構いません。',
+      '画像内に文字（字幕・透かし・ロゴ・英字）は描かないでください。',
       '',
       '【日記】',
       diary,
@@ -286,7 +268,7 @@
       '',
       `雰囲気: ${moodHint.jp}（${toneHint.jp}）`,
       '',
-      '構図: 自然で読みやすいレイアウトで、日記の主題が伝わるように。',
+      '構図: 自然で読みやすいレイアウトで主題が明確に伝わるように。',
       '',
       `アスペクト比: ${ratio}`,
       '',

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Picture Diary</title>
     <meta name="description" content="テキストから日記を整形し、画像と音楽のプロンプトを生成するミニWebアプリ。" />
-    <link rel="canonical" href="./" />
+    <link rel="canonical" href="https://attrip.github.io/picture_diary/" />
 
     <!-- App Icons -->
     <link rel="icon" type="image/svg+xml" href="./assets/icon.svg" />
@@ -23,9 +23,9 @@
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Picture Diary" />
     <meta property="og:description" content="テキストから日記整形＋画像/音楽プロンプトを生成。" />
-    <meta property="og:url" content="./" />
+    <meta property="og:url" content="https://attrip.github.io/picture_diary/" />
     <!-- Use repo OG image as fallback until a local one is provided -->
-    <meta property="og:image" content="./assets/icon.svg" />
+    <meta property="og:image" content="https://opengraph.githubassets.com/1/attrip/picture_diary" />
     <meta name="twitter:card" content="summary_large_image" />
 
     <link rel="stylesheet" href="./styles.css" />
@@ -64,15 +64,13 @@
         </div>
         <div id="chat" class="chat">
           <div id="chatMessages" class="messages"></div>
-          <textarea id="chatInput" rows="2" placeholder="ここに返信を入力（Enterで改行、Ctrl/⌘+Enterで送信）"></textarea>
-          <div class="actions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0;">
-            <button id="chatRestart">やり直す</button>
-            <button id="chatUndo">取り消し</button>
-            <button id="chatSkip">スキップ</button>
-            <button id="chatSend" class="primary">送信</button>
-            <button id="chatIdeasRefresh" type="button">アイデアを更新</button>
-            <button id="chatFinalize" class="primary">まとめて生成</button>
+          <div class="chat-controls">
+            <textarea id="chatInput" rows="2" placeholder="ここに返信を入力（Enterで改行、Ctrl/⌘+Enterで送信）"></textarea>
           </div>
+          <nav class="actions chat-nav" aria-label="チャット操作">
+            <button id="chatRestart">やり直す</button>
+            <button id="chatSend" class="primary">送信</button>
+          </nav>
           <div class="actions" style="margin-top: 4px; justify-content: flex-end;">
             <label style="display:flex; gap:8px; align-items:center; cursor:pointer; font-size: 0.9em;">
               <input id="chatEnterToSend" type="checkbox" checked />
@@ -82,6 +80,14 @@
           <div class="ideas-row">
             <small class="hint">アイデアに迷ったら：下の候補をクリック</small>
             <div class="chips" id="chatIdeas"></div>
+            <div class="actions" style="margin:4px 0 0;">
+              <button id="chatIdeasRefresh" type="button">アイデアを更新</button>
+            </div>
+          </div>
+          <div class="actions">
+            <button id="chatSkip">スキップ</button>
+            <button id="chatUndo">取り消し</button>
+            <button id="chatFinalize" class="primary">まとめて生成</button>
           </div>
           <p class="hint">質問に答えると、下の入力欄に自動で文章をまとめます。</p>
         </div>
@@ -96,16 +102,17 @@
           <div class="field">
             <label for="style">スタイル</label>
             <select id="style">
-              <option value="ukiyoe">浮世絵スタイル</option>
-              <option value="photoreal-portrait">フォトリアル・ポートレート</option>
-              <option value="anime-character">アニメ風キャラクター</option>
-              <option value="impasto-oil">厚塗り油絵</option>
-              <option value="retro-film">レトロなフィルム写真</option>
-              <option value="detailed-pen">細密なペン画</option>
-              <option value="3d-character">3Dモデルキャラクター</option>
-              <option value="pop-art">ポップアート</option>
-              <option value="steampunk">スチームパンク</option>
-              <option value="minimalist-line-art">ミニマリスト・ラインアート</option>
+              <option value="cinematic_lighting" selected>1. シネマティック・ライティング</option>
+              <option value="artist_fusion">2. アーティストスタイル・フュージョン</option>
+              <option value="nostalgic_film">3. ノスタルジック・フィルム</option>
+              <option value="ukiyoe_pop">4. 浮世絵ポップ</option>
+              <option value="retro_future_80s">5. レトロフューチャー'80s</option>
+              <option value="minimal_line_art">6. ミニマル・ラインアート</option>
+              <option value="watercolor_ink">7. 水彩画 ＆ インク</option>
+              <option value="impasto_concept">8. 厚塗り・コンセプトアート風</option>
+              <option value="double_exposure">9. ダブルエクスポージャー</option>
+              <option value="abstract_expressionism">10. 抽象表現主義アート</option>
+              <option value="retro_anime_showa">11. レトロアニメ風／昭和アニメ風カラーリング</option>
             </select>
           </div>
           <div class="field">
@@ -203,163 +210,28 @@
       </section>
 
       <section class="card wide">
-        <details>
-          <summary><h2>音楽プロンプト（Suno風）</h2></summary>
-          <div id="musicCard" style="margin-top: 1rem;">
-            <h3 style="margin:8px 0 6px;">クイックプリセット（細かい設定不要）</h3>
-            <div class="chips" id="musicQuickPresets">
-              <button type="button" class="chip" data-preset="lofi_night">Lo-fi 夜散歩</button>
-              <button type="button" class="chip" data-preset="city_afterglow">City Pop 余韻</button>
-              <button type="button" class="chip" data-preset="trap_rain">Trap 雨上がり</button>
-              <button type="button" class="chip" data-preset="acoustic_morning">Acoustic 朝</button>
-              <button type="button" class="chip" data-preset="jazz_cafe">Jazz カフェ</button>
-              <button type="button" class="chip" data-preset="bossa_sunset">Bossa 夕暮れ</button>
-              <button type="button" class="chip" data-preset="jpop_ballad">J-POP バラード</button>
-              <button type="button" class="chip" data-preset="indie_pop">Indie Pop 週末</button>
-              <button type="button" class="chip" data-preset="boom_bap_jp">Boom Bap 帰り道</button>
-              <button type="button" class="chip" data-preset="lofi_rap">Lo-fi Rap 雨</button>
-              <button type="button" class="chip" data-preset="chill_rap">Chill Rap 低気圧</button>
-              <button type="button" class="chip" data-preset="emo_rock">Emo Rock</button>
-              <button type="button" class="chip" data-preset="punk_garage">Punk / Garage</button>
-              <button type="button" class="chip" data-preset="edm_house">EDM / House</button>
-              <button type="button" class="chip" data-preset="ambient_afterglow">Ambient Afterglow</button>
-              <button type="button" class="chip" data-preset="dub_night">Dub 夜歩き</button>
-              <button type="button" class="chip ghost" data-preset="random">おまかせ</button>
-              <button type="button" class="chip ghost" data-preset="clear">選択しない（既定）</button>
-            </div>
-            <small id="musicPresetLabel" class="hint"></small>
-            <div class="row">
-              <div class="field" id="musicThemeGroup" style="min-width:280px">
-                <label for="musicTheme">テーマ（短く・名詞で）</label>
-                <div class="input-row">
-                  <input id="musicTheme" type="text" placeholder="例：雨上がり / 都会の夜 / 帰り道" />
-                  <button id="musicThemeClear" type="button" aria-label="テーマをクリア">クリア</button>
-                </div>
-                <div class="chips" id="musicThemeChips" aria-label="テーマ候補">
-                  <button type="button" class="chip ghost" data-theme="日常">日常</button>
-                  <button type="button" class="chip ghost" data-theme="都会">都会</button>
-                  <button type="button" class="chip ghost" data-theme="帰り道">帰り道</button>
-                  <button type="button" class="chip ghost" data-theme="夜散歩">夜散歩</button>
-                  <button type="button" class="chip ghost" data-theme="雨上がり">雨上がり</button>
-                  <button type="button" class="chip ghost" data-theme="孤独">孤独</button>
-                  <button type="button" class="chip ghost" data-theme="余韻">余韻</button>
-                </div>
-                <small id="musicThemePreview" class="hint">English keywords: everyday life / city / afterglow</small>
-                <small class="hint">日本語入力OK（プロンプトは英語で出力）</small>
-              </div>
-              <div class="field">
-                <label for="musicGenre">ジャンル</label>
-                <select id="musicGenre">
-                  <option value="jpop">J-POP</option>
-                  <option value="citypop" selected>City Pop</option>
-                  <option value="lofi">Lo-fi Hip Hop</option>
-                  <option value="trap">Trap / Emo Rap</option>
-                  <option value="rb">R&B</option>
-                  <option value="rock">Rock / Indie</option>
-                  <option value="acoustic">Acoustic / Folk</option>
-                  <option value="edm">EDM / House</option>
-                  <option value="futurebass">Future Bass</option>
-                  <option value="jazz">Jazz</option>
-                  <option value="bossa">Bossa Nova</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="musicMood">雰囲気</label>
-                <select id="musicMood">
-                  <option value="warm">あたたかい</option>
-                  <option value="nostalgic" selected>ノスタルジック</option>
-                  <option value="dreamy">夢のよう</option>
-                  <option value="energetic">元気</option>
-                  <option value="melancholy">もの静か</option>
-                  <option value="cozy">居心地よい</option>
-                  <option value="rainy">雨の情緒</option>
-                  <option value="night">夜</option>
-                  <option value="sunny">晴れやか</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="musicVocal">ボーカル</label>
-                <select id="musicVocal">
-                  <option value="sing" selected>歌</option>
-                  <option value="rap">ラップ</option>
-                  <option value="both">ミックス（歌+ラップ）</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="musicLang">言語</label>
-                <select id="musicLang">
-                  <option value="ja" selected>日本語</option>
-                  <option value="en">英語</option>
-                  <option value="mix">ミックス</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="musicTone">歌詞のトーン</label>
-                <select id="musicTone">
-                  <option value="introspective" selected>内省的</option>
-                  <option value="poetic">詩的</option>
-                  <option value="colloquial">口語的</option>
-                  <option value="punchy">力強い</option>
-                  <option value="humorous">ユーモア</option>
-                  <option value="melancholic">物悲しい</option>
-                  <option value="romantic">ロマンチック</option>
-                  <option value="empowering">前向き</option>
-                  <option value="storytelling">物語調</option>
-                  <option value="minimal">ミニマル</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="musicTempo">テンポ</label>
-                <select id="musicTempo">
-                  <option value="slow">ゆっくり（70-90）</option>
-                  <option value="mid" selected>ふつう（90-110）</option>
-                  <option value="fast">はやい（120-150）</option>
-                </select>
-              </div>
-            </div>
-            <div class="chips" id="musicGenreChips">
-              <button data-genre="citypop" class="chip">City Pop</button>
-              <button data-genre="lofi" class="chip">Lo-fi</button>
-              <button data-genre="trap" class="chip">Trap</button>
-              <button data-genre="rb" class="chip">R&B</button>
-              <button data-genre="rock" class="chip">Rock</button>
-              <button data-genre="acoustic" class="chip">Acoustic</button>
-              <button data-genre="edm" class="chip">EDM</button>
-              <button data-genre="jazz" class="chip">Jazz</button>
-              <button data-genre="bossa" class="chip">Bossa</button>
-            </div>
-            <h3 style="margin:8px 0 4px;">カスタムプリセット</h3>
-            <div class="chips" id="musicCustomChips">
-              <button data-genre="rap" class="chip">Rap</button>
-              <button data-genre="reggae" class="chip">Reggae</button>
-              <button data-genre="dub" class="chip">Dub</button>
-              <button data-genre="jungle" class="chip">Jungle</button>
-            </div>
-            <details id="addPresetDetails" style="margin:8px 0 12px;">
-              <summary>＋ プリセットを追加</summary>
-              <div class="row">
-                <div class="field"><label for="presetKey">キー(英字)</label><input id="presetKey" type="text" placeholder="例: hyperpop" /></div>
-                <div class="field"><label for="presetName">表示名</label><input id="presetName" type="text" placeholder="例: Hyperpop" /></div>
-                <div class="field"><label for="presetInstr">楽器/質感</label><input id="presetInstr" type="text" placeholder="例: detuned saws, glossy leads, clipped drums" /></div>
-                <div class="field"><label for="presetBpm">BPM目安</label><input id="presetBpm" type="text" placeholder="例: 150-180" /></div>
-              </div>
-              <button id="presetAddBtn" type="button">追加</button>
-              <p class="hint">キーは英字で。スペースは自動でハイフンに変換（例: "future bass" → "future-bass"）。</p>
-            </details>
-            <button id="musicGenerate" class="primary">音楽プロンプトを生成</button>
-            <p class="hint">出力は英語のみ。言語設定は歌詞アイデアの言語に適用されます。</p>
-            <h3 style="margin:12px 0 6px;">音楽プロンプト</h3>
-            <textarea id="musicOut" rows="8" readonly></textarea>
-            <div class="actions">
-              <button data-copy="#musicOut">コピー</button>
-            </div>
-            <h3 style="margin:12px 0 6px;">歌・ラップのアイデア</h3>
-            <textarea id="lyricOut" rows="6" readonly></textarea>
-            <div class="actions">
-              <button data-copy="#lyricOut">コピー</button>
-            </div>
+        <h2>Suno用スタイル変換</h2>
+        <div class="row">
+          <div class="field" style="min-width:320px;">
+            <label for="sunoDesc">自由入力（曲の説明）</label>
+            <textarea id="sunoDesc" rows="4" placeholder="例：雨上がりの夜、静かな街を歩く気分で。少しノスタルジック、でも前向き。"></textarea>
           </div>
-        </details>
+        </div>
+        <div class="row">
+          <div class="field" style="min-width:320px;">
+            <label for="sunoExtra">さらに言いたいこと（任意）</label>
+            <textarea id="sunoExtra" rows="3" placeholder="例：女性ボーカルでささやく感じ。テンポは100前後。アコギ・ベース・柔らかいパッド。"></textarea>
+          </div>
+        </div>
+        <button id="sunoMake" class="primary">Sunoプロンプト作成</button>
+        <h3 style="margin:12px 0 6px;">生成されたプロンプト</h3>
+        <textarea id="sunoPromptOut" rows="10" readonly></textarea>
+        <div class="actions">
+          <button data-copy="#sunoPromptOut">コピー</button>
+          <button data-open="chatgpt" data-source="#sunoPromptOut">ChatGPTで開く</button>
+          <button data-open="gemini" data-source="#sunoPromptOut">Geminiで開く</button>
+        </div>
+        <p class="hint">上記は “Suno Style Prompt Optimizer” への依頼文です。ChatGPT/Geminiで開くと自動でコピーされるので、そのまま貼り付けて送信してください。</p>
       </section>
     </main>
 
@@ -379,7 +251,6 @@
     </section>
 
     <script src="lib/prompt.js"></script>
-    <script src="lib/music.js"></script>
     <script src="lib/log.js"></script>
     <script src="app/main.js"></script>
   </body>

@@ -94,6 +94,11 @@
   const chatUndo = $('#chatUndo');
   const chatModeEl = $('#chatMode');
   const chatEnterToSendEl = $('#chatEnterToSend');
+  // Suno style converter
+  const sunoDescEl = document.getElementById('sunoDesc');
+  const sunoExtraEl = document.getElementById('sunoExtra');
+  const sunoMakeBtn = document.getElementById('sunoMake');
+  const sunoPromptOutEl = document.getElementById('sunoPromptOut');
 
   function copyFrom(selector) {
     const el = document.querySelector(selector);
@@ -153,8 +158,20 @@
         } else if (style === 'rap') {
           text = [
             '日本語のラップ歌詞を作成してください。',
-            '構成: intro, verse, pre-chorus, chorus（hook）。短いフレーズで、自然な韻や反復を適度に。',
-            '表現: 過度に露骨な表現は避け、読みやすさとリズムを両立。',
+            '',
+            '構成は [intro], [verse], [pre-chorus], [chorus] の順番で [ ] を使って明記してください。',
+            '',
+            '各ブロックの冒頭に [ ] を使って、曲の雰囲気やスタイルを英語で指定してください。',
+            '例: [Lo-Fi hip hop, mellow beats, tempo 88 BPM, nostalgic vinyl crackle, smooth Rhodes keys, relaxed night vibe]',
+            '',
+            '歌詞本文では、',
+            '- () : 感情や情景を英語で短く補足してください（例: (soft light), (honest voice), (dreamy vibe)）',
+            '- [] : 曲の雰囲気やサウンド演出を英語で補足してください（例: [deep bass drop], [jazzy sax riff], [retro synth stab]）',
+            '- ただし () と [] の使用は控えめにし、各ブロックにつき 1〜2回程度までにしてください。',
+            '',
+            'フレーズは短く、自然な韻と反復を意識し、読みやすさとリズムを両立してください。',
+            '',
+            '過度に露骨な表現は避け、ポジティブなメッセージが伝わるようにしてください。',
             '',
             '題材メモ:',
             (text || '').trim(),
@@ -180,6 +197,61 @@
       window.open(url, '_blank', 'noopener');
     }
   });
+
+  // --- Suno prompt builder (meta-prompt for LLM) ---
+  function buildSunoMetaPrompt(desc, extra) {
+    const userText = (desc || '').trim();
+    const extraText = (extra || '').trim();
+    const lines = [
+      'You are a "Suno Style Prompt Optimizer".',
+      '',
+      'Your task:',
+      '- Convert the user\'s natural language description of music (can include structure labels like [Bridge – call & response], emotional words, or technical notes) into a Suno-compatible 4-line style prompt.',
+      '',
+      'Output rules:',
+      '1. Always output in English only.',
+      '2. Each line must be a comma-separated list of tags (no sentences).',
+      '3. Always keep the 4 fixed lines in this exact order:',
+      '   🎼 Style（Suno用）',
+      '   Line 1: Genre/Style, Key, Tempo (BPM), Song structure (e.g., build-up & drop, verse/chorus/bridge)',
+      '   Line 2: Instruments / Sound elements (kick, bass, synth, pad, FX, strings, etc.)',
+      '   Line 3: Vocal style (e.g., no vocals, female airy vocal, rap male deep, call & response, choir)',
+      '   Line 4: Mood / Atmosphere / Mix quality (uplifting, dark, emotional, clean mix, wide stereo image, etc.)',
+      '',
+      'Transformation rules:',
+      '- Interpret ambiguous or casual terms (like "emotional", "clubby", "bright") and map them to clear production tags.',
+      '- If the user specifies song sections (e.g., "[Bridge – call & response]"), reflect it in Line 1 (structure) or Line 3 (vocal style) depending on context.',
+      '- If the user doesn\'t specify BPM or key, infer a reasonable default (e.g., 120 BPM, C major).',
+      '- Do NOT output explanations, only the 4 lines.',
+      '',
+      'Example:',
+      'User input: "A high-energy EDM track with a bridge in call & response style, no vocals, euphoric mood."',
+      'Output:',
+      '🎼 Style（Suno用）',
+      'EDM, progressive house, C major, 128 BPM, build-up & drop, bridge with call & response',
+      'four-on-the-floor kick, tight hi-hats, deep bassline, bright arpeggiated synth lead, wide supersaw pad',
+      'no vocals, call & response instrumental phrasing',
+      'uplifting, energetic, euphoric, clean & polished mix, wide stereo image',
+      '',
+      '--- USER INPUT ---',
+      userText || '(none)'
+    ];
+    if (extraText) {
+      lines.push('', '--- EXTRA ---', extraText);
+    }
+    lines.push('', 'Return only the 4 lines.');
+    return lines.join('\n');
+  }
+  if (sunoMakeBtn) {
+    sunoMakeBtn.addEventListener('click', () => {
+      const meta = buildSunoMetaPrompt(
+        sunoDescEl ? sunoDescEl.value : '',
+        sunoExtraEl ? sunoExtraEl.value : ''
+      );
+      if (sunoPromptOutEl) sunoPromptOutEl.value = meta;
+      try { showToast('Suno用プロンプトを作成しました'); } catch(_){}
+    });
+  }
 
   // Toast + Step helpers
   function showToast(msg) {
@@ -347,7 +419,10 @@
         'assistant',
         useTyping ? { typing: true, speed: 36, compact: true } : undefined
       );
-      chatInput.placeholder = '返信を入力（Enterで改行、Ctrl/⌘+Enterで送信）';
+      const enterToSend = chatEnterToSendEl && chatEnterToSendEl.checked;
+      chatInput.placeholder = enterToSend
+        ? '返信を入力（Enterで送信、Shiftで改行）'
+        : '返信を入力（Enterで改行、Ctrl/⌘+Enterで送信）';
       chatInput.focus();
       refreshChatIdeas();
     } else {
@@ -381,8 +456,11 @@
     if (chatFinalize) chatFinalize.style.display = isMemoMode ? 'none' : '';
 
     if (isMemoMode) {
-      addMsg('メモをどうぞ。入力内容は下に自動で反映されます。', 'assistant', { typing: true, speed: 32 });
-      chatInput.placeholder = 'ここにメモを入力（Ctrl/⌘+Enterで送信）';
+      addMsg('メモをどうぞ。入力内容は下に自動で反映されます。', 'assistant');
+      const enterToSend = chatEnterToSendEl && chatEnterToSendEl.checked;
+      chatInput.placeholder = enterToSend
+        ? 'ここにメモを入力（Enterで送信）'
+        : 'ここにメモを入力（Ctrl/⌘+Enterで送信）';
       rawEl.value = ''; // Clear raw text area for new memo session
       return;
     }
@@ -428,31 +506,54 @@
   }
 
   function undoLast() {
-    if (state.i <= 0) return;
+    const mode = chatModeEl ? chatModeEl.value : 'essay';
+
+    // Memo mode: remove the last user message and the last raw line
+    if (mode === 'memo') {
+      // Find last user message node
+      let node = chatMessages && chatMessages.lastElementChild;
+      while (node && !node.classList.contains('user')) node = node.previousElementSibling;
+      if (node && node.parentNode) node.parentNode.removeChild(node);
+      // Remove last line in raw input
+      if (rawEl && typeof rawEl.value === 'string') {
+        const lines = rawEl.value.replace(/\n+$/,'').split('\n');
+        if (lines.length) { lines.pop(); rawEl.value = lines.join('\n') + (lines.length ? '\n' : ''); }
+      }
+      return;
+    }
+
+    // Non-memo modes: roll back conversation step
+    const steps = state.phase === 'main' ? currentSteps() : refineSteps;
+
     // If finalize message is shown, remove it and disable finalize
     if (chatFinalize && !chatFinalize.disabled) {
       const last = chatMessages.lastElementChild;
-      if (last && last.classList.contains('assistant')) {
+      if (last && last.classList && last.classList.contains('assistant')) {
         chatMessages.removeChild(last);
       }
       chatFinalize.disabled = true;
     }
-    // Remove last assistant question (for next step) if present
+
+    // Remove last assistant question if present
     let lastNode = chatMessages.lastElementChild;
-    if (lastNode && lastNode.classList.contains('assistant')) {
+    if (lastNode && lastNode.classList && lastNode.classList.contains('assistant')) {
       chatMessages.removeChild(lastNode);
     }
     // Remove last user answer
     lastNode = chatMessages.lastElementChild;
-    if (lastNode && lastNode.classList.contains('user')) {
+    if (lastNode && lastNode.classList && lastNode.classList.contains('user')) {
       chatMessages.removeChild(lastNode);
     }
-    // Roll back state and answers
-    state.i = Math.max(0, state.i - 1);
-    const key = steps[state.i] && steps[state.i].key;
-    if (key && state.answers[key]) delete state.answers[key];
-    // Re-ask current question
-    rawEl.value = composeRawFromAnswers(state.answers);
+
+    // Roll back state and answers (guard for i>0)
+    if (state.i > 0) state.i = Math.max(0, state.i - 1);
+    const cur = steps[state.i];
+    const key = cur && cur.key;
+    if (key && state.answers && Object.prototype.hasOwnProperty.call(state.answers, key)) {
+      delete state.answers[key];
+    }
+    // Re-ask current question and recompute raw
+    rawEl.value = composeRawFromAnswers(state.answers, chatModeEl ? chatModeEl.value : 'essay');
     ask();
   }
 
@@ -554,7 +655,11 @@
       updateHistoryCount();
     } catch (_) {}
   });
-  if (chatRestart) chatRestart.addEventListener('click', restart);
+  // "やり直す": 直前の発言を取り消す（Undo）。
+  if (chatRestart) chatRestart.addEventListener('click', () => {
+    try { undoLast(); } catch (_) { /* noop */ }
+    chatInput && chatInput.focus();
+  });
   if (chatUndo) chatUndo.addEventListener('click', undoLast);
   if (chatSkip) chatSkip.addEventListener('click', skipStep);
   if (chatModeEl) chatModeEl.addEventListener('change', () => restart());
@@ -654,8 +759,10 @@
       }
       const isUndo = (e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z');
       if (isUndo) {
-        e.preventDefault();
-        undoLast();
+        if (!chatInput.value) {
+          e.preventDefault();
+          undoLast();
+        }
       }
     });
   }
@@ -959,6 +1066,23 @@
     const nl = t.split(/\n+/)[0];
     return (nl || t).replace(/\s+/g, ' ').slice(0, 120);
   }
+  function isDateLine(s) {
+    const t = (s || '').trim();
+    // Matches: 2025年09月11日(木) / 2025-09-11 / 2025/09/11
+    return /^(\d{4})([\/\-]|年)\d{1,2}([\/\-]|月)\d{1,2}(日|\b)/.test(t);
+  }
+  function firstContentFromDiary(diary) {
+    if (!diary) return '';
+    const lines = String(diary).split(/\n+/).map(s => s.trim()).filter(Boolean);
+    if (!lines.length) return '';
+    // Skip the first line if it looks like a date
+    const start = isDateLine(lines[0]) ? 1 : 0;
+    for (let i = start; i < lines.length; i++) {
+      const ln = lines[i];
+      if (ln) return ln.replace(/\s+/g, ' ').slice(0, 120);
+    }
+    return lines[0].replace(/\s+/g, ' ').slice(0, 120);
+  }
   function renderHistoryList() {
     const listEl = document.getElementById('historyList');
     if (!listEl || !window.PDLog) return;
@@ -972,7 +1096,8 @@
       type.textContent = it.type === 'music' ? 'music' : (it.type === 'chat-finalize' ? 'chat' : 'image');
       const title = document.createElement('div');
       title.className = 'history-title';
-      const line = firstLineOf(it.raw || (it.answers && Object.values(it.answers)[0]) || it.theme || it.diary || it.prompt || '');
+      // Prefer user's original input when available; otherwise derive from diary without the date line
+      const line = (it.raw && firstLineOf(it.raw)) || firstContentFromDiary(it.diary) || firstLineOf(it.prompt || it.theme || '');
       title.textContent = line || '(no title)';
       const ts = document.createElement('span');
       ts.className = 'history-ts';

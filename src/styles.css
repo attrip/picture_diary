@@ -76,6 +76,7 @@ button:hover { filter: brightness(1.05); }
 
 .actions { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
 .actions > * { max-width: 100%; }
+.chat-nav { justify-content: space-between; }
 @media (max-width: 480px) {
   /* Avoid overflow on narrow screens by allowing buttons to wrap nicely */
   .chat .actions button { flex: 1 1 calc(50% - 8px); }
@@ -91,7 +92,7 @@ button:hover { filter: brightness(1.05); }
 .msg.assistant { background: #131a22; align-self: start; }
 .msg.user { background: #172234; margin-left: auto; }
 .msg.compact { margin-top: -2px; }
-.chat-controls { display: grid; gap: 8px; align-items: stretch; }
+.chat-controls { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: stretch; overflow: hidden; }
 .chat-controls input, .chat-controls textarea { background: #0d1117; color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; max-width: 100%; min-width: 0; }
 .chat-controls textarea { resize: none; height: 56px; min-height: 56px; max-height: 56px; }
 
