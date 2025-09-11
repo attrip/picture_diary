@@ -99,55 +99,73 @@
           .slice(0, 3);
         return '・' + (parts.join(' / ') || s);
       });
-      // Add a tone-based hook line
-      const tone = detectTone(text);
-      const hint = toneHints(tone).jp.replace(/、.*/, '');
-      lines.push(`・hook: ${hint}`);
+      // ラップでは自動フック行は追加しない（ユーザー入力のみ反映）
       return `${date}\n${lines.join('\n')}`;
     }
     // prose (default)
     const first = sentences[0];
     const middle = sentences.slice(1, -1);
     const last = sentences[sentences.length - 1] || '';
+    const includeInsight = sentences.length >= 2 && typeof last === 'string' && last.trim().length >= 2 && last !== first;
     const body = [
       `【今日の出来事】${first}。`,
       ...(middle.length ? middle.map(s => `・${s}。`) : []),
-      last ? `【気づき/感情】${last}。` : '',
+      includeInsight ? `【気づき/感情】${last}。` : '',
     ].filter(Boolean).join('\n');
     return `${date}\n${body}`;
   }
 
   function stylePreset(style) {
     switch (style) {
-      case 'watercolor':
+      case 'cinematic_lighting':
         return {
-          jp: '透明感のある水彩画、柔らかい滲み、淡い色彩',
-          en: 'soft watercolor, gentle bleeding, light pastel palette',
+          jp: '映画のような劇的で感情的な照明効果、リムライト、ボリューメトリックライト、ドラマチックな影、ゴッドレイ',
+          en: 'nanabanana, cinematic lighting, rim light, volumetric lighting, dramatic shadows, god rays',
         };
-      case 'watercolor-minimal-portrait':
+      case 'artist_fusion':
         return {
-          jp: '日本の水彩ミニマル、和紙の質感、細い鉛筆線、エアリーな粒状感、現代的な服装（着物は除く）、髪は深い黒褐色（白/灰/金髪は除く）、バストアップ、清潔な構図、穏やかで親密な雰囲気、柔らかな環境光',
-          en: 'Japanese watercolor minimal, washi paper texture, thin pencil line, airy grain, modern clothing (no kimono), hair deep black-brown (no white/gray/blonde), bust-up portrait, serene and intimate mood, soft ambient light, clean composition',
+          jp: '著名アーティストの作風を掛け合わせたフュージョンスタイル（好みの作家名を追加可能）',
+          en: 'nanabanana, by Ilya Kuvshinov, by Range Murata, by James Jean, by Yoshitaka Amano',
         };
-      case 'toy-statuette-3d-desk':
+      case 'nostalgic_film':
         return {
-          jp: '写真の被写体をトイ風スタチューに変換。背後にキャラクター画像入りの箱（ブランド風だが可読ロゴや文字は避ける）。ノートPC/モニタにはBlenderのモデリング画面。箱の前に円形スタンドを置き、その上にスタチューを座らせる。室内スタジオやデスク環境、柔らかなキーライトと控えめなレフ。3Dプリントらしいごく淡いレイヤー跡。',
-          en: 'transform the subject into a toy-like statuette; behind it place a character-illustrated box (brand-like, avoid readable logos/text); add a laptop/monitor showing the Blender modeling view; place a circular stand in front of the box and seat the figure on it; indoor studio or desk environment, soft key light, subtle bounce; faint 3D-printed layer lines.',
+          jp: 'フィルム写真のような少し色褪せたノスタルジックな空気、光漏れや粒状感、エモーショナル',
+          en: 'nanabanana, nostalgic film photo, light leaks, grainy, summer memories, cinematic',
         };
-      case 'manga':
+      case 'ukiyoe_pop':
         return {
-          jp: 'マンガ風、きれいな線画、ハーフトーン、シンプルな配色',
-          en: 'clean manga line art, screentone, simple palette',
+          jp: '浮世絵の木版画表現と現代的なキャラクターデザインの融合、太い輪郭と大胆な配色',
+          en: 'nanabanana, Ukiyo-e style, woodblock print, Hokusai style, Japanese print, bold outlines',
         };
-      case 'oil':
+      case 'retro_future_80s':
         return {
-          jp: '油絵、厚塗り、筆致が見える、重厚な陰影',
-          en: 'oil painting, impasto, visible brush strokes, dramatic shading',
+          jp: '1980年代のレトロフューチャー、SFアニメ調、メカ/カセット・フューチャリズム、VHSスクリーン感',
+          en: 'nanabanana, 80s retro anime style, retro future, mecha, cassette futurism, vhs screen',
         };
-      case 'photo':
+      case 'minimal_line_art':
         return {
-          jp: '写真風、自然光、シネマティック、浅い被写界深度',
-          en: 'photorealistic, natural light, cinematic, shallow depth of field',
+          jp: '繊細な線の魅力に焦点、ミニマルで洗練されたモノクローム、余白を活かす',
+          en: 'nanabanana, minimalist, line art, clean, monochromatic, empty space, delicate',
+        };
+      case 'watercolor_ink':
+        return {
+          jp: '水彩のにじみとインク（墨）の筆致、線と淡い彩色のコンビネーション（線とウォッシュ）',
+          en: 'nanabanana, watercolor, ink wash painting, sumi-e, rough sketch, line and wash',
+        };
+      case 'impasto_concept':
+        return {
+          jp: '厚塗り・コンセプトアート風。油絵の重厚感、筆致やパレットナイフの質感を残す',
+          en: 'nanabanana, impasto, oil painting style, thick brush strokes, palette knife, concept art',
+        };
+      case 'double_exposure':
+        return {
+          jp: 'ダブルエクスポージャー。シルエット内に風景やパターンを重ねて内面や心情を象徴的に表現',
+          en: 'nanabanana, double exposure, silhouette, superimposed, nature pattern, cityscape',
+        };
+      case 'abstract_expressionism':
+        return {
+          jp: '抽象表現主義。ドリッピングや激しい筆致、具象と抽象の共存、カオティックでエネルギッシュ',
+          en: 'nanabanana, abstract expressionism, action painting, Jackson Pollock style, paint splatter, dynamic brushstrokes, chaotic energy',
         };
       default:
         return { jp: '', en: '' };
@@ -209,7 +227,7 @@
     return sents[0] || '';
   }
 
-  function buildImagePrompt({ rawText, diary, style = 'watercolor', mood = 'calm', aspect = '1:1', detail = 'balanced', includeTitle = true }) {
+  function buildImagePrompt({ rawText, diary, style = 'cinematic_lighting', mood = 'calm', aspect = '1:1', detail = 'balanced', includeTitle = true }) {
     const tone = detectTone(rawText);
     const kws = extractKeywords(rawText, 12);
     const preset = stylePreset(style);
@@ -221,17 +239,20 @@
 
     const en = [
       `scene from a diary: ${kws.slice(0, 6).join(', ')}`,
+      `render one emotionally striking key moment inferred from the text`,
       `${preset.en}`,
       `${moodHint.en} (${toneHint.en})`,
       `composition: readable layout, main subject near center`,
       `${detailHint}`,
       `aspect: ${ratio}`,
+      `no text/letters/logos/watermarks in the image`,
       `high quality, sharp focus, coherent anatomy, consistent lighting`,
     ].join(' / ');
 
     const prompt = [
-      '以下の日記の内容を元に、最も印象的な場面を想像して、感情が伝わるような画像を1枚作成してください。',
-      '文章はイメージ作成の参考情報であり、画像内に文字（字幕・透かし・ロゴ・英字）は描かないでください。',
+      '以下の文章（短い日記/メモ）を読み、内容から情景を想像して「最も印象的な一場面」を1枚の画像として描いてください。',
+      '文章はキーワードの羅列ではなく、イメージ構築の手がかりです。主題に焦点を当て、不要な要素は省略して構いません。',
+      '画像内に文字（字幕・透かし・ロゴ・英字）は描かないでください。',
       '',
       '【日記】',
       diary,
@@ -242,7 +263,7 @@
       '',
       `雰囲気: ${moodHint.jp}（${toneHint.jp}）`,
       '',
-      '構図: 自然で読みやすいレイアウトで、日記の主題が伝わるように。',
+      '構図: 自然で読みやすいレイアウトで主題が明確に伝わるように。',
       '',
       `アスペクト比: ${ratio}`,
       '',

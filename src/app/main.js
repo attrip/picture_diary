@@ -347,7 +347,10 @@
         'assistant',
         useTyping ? { typing: true, speed: 36, compact: true } : undefined
       );
-      chatInput.placeholder = '返信を入力（Enterで改行、Ctrl/⌘+Enterで送信）';
+      const enterToSend = chatEnterToSendEl && chatEnterToSendEl.checked;
+      chatInput.placeholder = enterToSend
+        ? '返信を入力（Enterで送信、Shiftで改行）'
+        : '返信を入力（Enterで改行、Ctrl/⌘+Enterで送信）';
       chatInput.focus();
       refreshChatIdeas();
     } else {
@@ -382,7 +385,10 @@
 
     if (isMemoMode) {
       addMsg('メモをどうぞ。入力内容は下に自動で反映されます。', 'assistant');
-      chatInput.placeholder = 'ここにメモを入力（Ctrl/⌘+Enterで送信）';
+      const enterToSend = chatEnterToSendEl && chatEnterToSendEl.checked;
+      chatInput.placeholder = enterToSend
+        ? 'ここにメモを入力（Enterで送信）'
+        : 'ここにメモを入力（Ctrl/⌘+Enterで送信）';
       rawEl.value = ''; // Clear raw text area for new memo session
       return;
     }
@@ -428,31 +434,54 @@
   }
 
   function undoLast() {
-    if (state.i <= 0) return;
+    const mode = chatModeEl ? chatModeEl.value : 'essay';
+
+    // Memo mode: remove the last user message and the last raw line
+    if (mode === 'memo') {
+      // Find last user message node
+      let node = chatMessages && chatMessages.lastElementChild;
+      while (node && !node.classList.contains('user')) node = node.previousElementSibling;
+      if (node && node.parentNode) node.parentNode.removeChild(node);
+      // Remove last line in raw input
+      if (rawEl && typeof rawEl.value === 'string') {
+        const lines = rawEl.value.replace(/\n+$/,'').split('\n');
+        if (lines.length) { lines.pop(); rawEl.value = lines.join('\n') + (lines.length ? '\n' : ''); }
+      }
+      return;
+    }
+
+    // Non-memo modes: roll back conversation step
+    const steps = state.phase === 'main' ? currentSteps() : refineSteps;
+
     // If finalize message is shown, remove it and disable finalize
     if (chatFinalize && !chatFinalize.disabled) {
       const last = chatMessages.lastElementChild;
-      if (last && last.classList.contains('assistant')) {
+      if (last && last.classList && last.classList.contains('assistant')) {
         chatMessages.removeChild(last);
       }
       chatFinalize.disabled = true;
     }
-    // Remove last assistant question (for next step) if present
+
+    // Remove last assistant question if present
     let lastNode = chatMessages.lastElementChild;
-    if (lastNode && lastNode.classList.contains('assistant')) {
+    if (lastNode && lastNode.classList && lastNode.classList.contains('assistant')) {
       chatMessages.removeChild(lastNode);
     }
     // Remove last user answer
     lastNode = chatMessages.lastElementChild;
-    if (lastNode && lastNode.classList.contains('user')) {
+    if (lastNode && lastNode.classList && lastNode.classList.contains('user')) {
       chatMessages.removeChild(lastNode);
     }
-    // Roll back state and answers
-    state.i = Math.max(0, state.i - 1);
-    const key = steps[state.i] && steps[state.i].key;
-    if (key && state.answers[key]) delete state.answers[key];
-    // Re-ask current question
-    rawEl.value = composeRawFromAnswers(state.answers);
+
+    // Roll back state and answers (guard for i>0)
+    if (state.i > 0) state.i = Math.max(0, state.i - 1);
+    const cur = steps[state.i];
+    const key = cur && cur.key;
+    if (key && state.answers && Object.prototype.hasOwnProperty.call(state.answers, key)) {
+      delete state.answers[key];
+    }
+    // Re-ask current question and recompute raw
+    rawEl.value = composeRawFromAnswers(state.answers, chatModeEl ? chatModeEl.value : 'essay');
     ask();
   }
 
@@ -554,7 +583,11 @@
       updateHistoryCount();
     } catch (_) {}
   });
-  if (chatRestart) chatRestart.addEventListener('click', restart);
+  // "やり直す": 直前の発言を取り消す（Undo）。
+  if (chatRestart) chatRestart.addEventListener('click', () => {
+    try { undoLast(); } catch (_) { /* noop */ }
+    chatInput && chatInput.focus();
+  });
   if (chatUndo) chatUndo.addEventListener('click', undoLast);
   if (chatSkip) chatSkip.addEventListener('click', skipStep);
   if (chatModeEl) chatModeEl.addEventListener('change', () => restart());
@@ -961,6 +994,23 @@
     const nl = t.split(/\n+/)[0];
     return (nl || t).replace(/\s+/g, ' ').slice(0, 120);
   }
+  function isDateLine(s) {
+    const t = (s || '').trim();
+    // Matches: 2025年09月11日(木) / 2025-09-11 / 2025/09/11
+    return /^(\d{4})([\/\-]|年)\d{1,2}([\/\-]|月)\d{1,2}(日|\b)/.test(t);
+  }
+  function firstContentFromDiary(diary) {
+    if (!diary) return '';
+    const lines = String(diary).split(/\n+/).map(s => s.trim()).filter(Boolean);
+    if (!lines.length) return '';
+    // Skip the first line if it looks like a date
+    const start = isDateLine(lines[0]) ? 1 : 0;
+    for (let i = start; i < lines.length; i++) {
+      const ln = lines[i];
+      if (ln) return ln.replace(/\s+/g, ' ').slice(0, 120);
+    }
+    return lines[0].replace(/\s+/g, ' ').slice(0, 120);
+  }
   function renderHistoryList() {
     const listEl = document.getElementById('historyList');
     if (!listEl || !window.PDLog) return;
@@ -974,7 +1024,8 @@
       type.textContent = it.type === 'music' ? 'music' : (it.type === 'chat-finalize' ? 'chat' : 'image');
       const title = document.createElement('div');
       title.className = 'history-title';
-      const line = firstLineOf(it.diary || it.prompt || it.raw || it.theme || '');
+      // Prefer user's original input when available; otherwise derive from diary without the date line
+      const line = (it.raw && firstLineOf(it.raw)) || firstContentFromDiary(it.diary) || firstLineOf(it.prompt || it.theme || '');
       title.textContent = line || '(no title)';
       const ts = document.createElement('span');
       ts.className = 'history-ts';

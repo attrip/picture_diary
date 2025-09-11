@@ -76,6 +76,7 @@ button:hover { filter: brightness(1.05); }
 
 .actions { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
 .actions > * { max-width: 100%; }
+.chat-nav { justify-content: space-between; }
 @media (max-width: 480px) {
   /* Avoid overflow on narrow screens by allowing buttons to wrap nicely */
   .chat .actions button { flex: 1 1 calc(50% - 8px); }
