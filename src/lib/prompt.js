@@ -119,35 +119,55 @@
 
   function stylePreset(style) {
     switch (style) {
-      case 'watercolor':
+      case 'ukiyoe':
         return {
-          jp: '透明感のある水彩画、柔らかい滲み、淡い色彩',
-          en: 'soft watercolor, gentle bleeding, light pastel palette',
+          jp: '[描きたいもの]の浮世絵、歌川広重風、大胆な構図と美しいぼかし、哀愁漂う雰囲気',
+          en: 'Ukiyo-e of [subject], Hiroshige Utagawa style, bold composition and beautiful blurring, melancholic atmosphere',
         };
-      case 'watercolor-minimal-portrait':
+      case 'photoreal-portrait':
         return {
-          jp: '日本の水彩ミニマル、和紙の質感、細い鉛筆線、エアリーな粒状感、現代的な服装（着物は除く）、髪は深い黒褐色（白/灰/金髪は除く）、バストアップ、清潔な構図、穏やかで親密な雰囲気、柔らかな環境光',
-          en: 'Japanese watercolor minimal, washi paper texture, thin pencil line, airy grain, modern clothing (no kimono), hair deep black-brown (no white/gray/blonde), bust-up portrait, serene and intimate mood, soft ambient light, clean composition',
+          jp: '[人物の説明]の超リアルなポートレート、[感情や表情]、スタジオ照明、背景は[色]の無地、髪の毛一本一本まで鮮明',
+          en: 'Ultra-realistic portrait of [person description], [emotion/expression], studio lighting, solid [color] background, every single hair is clear',
         };
-      case 'toy-statuette-3d-desk':
+      case 'anime-character':
         return {
-          jp: '写真の被写体をトイ風スタチューに変換。背後にキャラクター画像入りの箱（ブランド風だが可読ロゴや文字は避ける）。ノートPC/モニタにはBlenderのモデリング画面。箱の前に円形スタンドを置き、その上にスタチューを座らせる。室内スタジオやデスク環境、柔らかなキーライトと控えめなレフ。3Dプリントらしいごく淡いレイヤー跡。',
-          en: 'transform the subject into a toy-like statuette; behind it place a character-illustrated box (brand-like, avoid readable logos/text); add a laptop/monitor showing the Blender modeling view; place a circular stand in front of the box and seat the figure on it; indoor studio or desk environment, soft key light, subtle bounce; faint 3D-printed layer lines.',
+          jp: '[キャラクターの説明]、人気アニメ映画風の壮大なイラスト、[感情]を表現する表情、[背景]、デジタルペインティング',
+          en: '[Character description], epic illustration in the style of a popular anime movie, facial expression that expresses [emotion], [background], digital painting',
         };
-      case 'manga':
+      case 'impasto-oil':
         return {
-          jp: 'マンガ風、きれいな線画、ハーフトーン、シンプルな配色',
-          en: 'clean manga line art, screentone, simple palette',
+          jp: '[描きたいもの]の厚塗りの油絵、レンブラント風の劇的な光と影、重厚な色彩、クラシックな雰囲気',
+          en: 'Impasto oil painting of [subject], dramatic light and shadow in the style of Rembrandt, deep colors, classic atmosphere',
         };
-      case 'oil':
+      case 'retro-film':
         return {
-          jp: '油絵、厚塗り、筆致が見える、重厚な陰影',
-          en: 'oil painting, impasto, visible brush strokes, dramatic shading',
+          jp: '[被写体]を写した80年代の日本のフィルム写真風、少しノイズの入った質感、温かみのある色合い、ノスタルジックな夏の日の雰囲気',
+          en: '80s Japanese film style photo of [subject], slightly noisy texture, warm colors, nostalgic summer day atmosphere',
         };
-      case 'photo':
+      case 'detailed-pen':
         return {
-          jp: '写真風、自然光、シネマティック、浅い被写界深度',
-          en: 'photorealistic, natural light, cinematic, shallow depth of field',
+          jp: '[描きたいもの]の非常に詳細なペン画、銅版画風の繊細な線、アンティークな雰囲気、イラストレーション',
+          en: 'Very detailed pen drawing of [subject], delicate lines in the style of a copperplate engraving, antique atmosphere, illustration',
+        };
+      case '3d-character':
+        return {
+          jp: '[キャラクターの説明]、高品質な3Dキャラクターモデル、トゥーンレンダリング、生き生きとした表情、明るいライティング',
+          en: '[Character description], high-quality 3D character model, toon rendering, lively expression, bright lighting',
+        };
+      case 'pop-art':
+        return {
+          jp: '[描きたいもの]のポップアート、鮮やかなシルクスクリーン風、大胆な色彩の反復、グラフィカルなデザイン',
+          en: 'Pop art of [subject], vivid silkscreen style, bold color repetition, graphical design',
+        };
+      case 'steampunk':
+        return {
+          jp: '[描きたいもの]のスチームパンク風イラスト、歯車と真鍮の装飾、緻密なメカニカルデザイン、ヴィクトリア朝の雰囲気、セピア調の色合い',
+          en: 'Steampunk illustration of [subject], gears and brass decoration, intricate mechanical design, Victorian atmosphere, sepia tones',
+        };
+      case 'minimalist-line-art':
+        return {
+          jp: '[描きたいもの]のミニマリストなラインアート、一筆書き風、シンプルな線、白背景、洗練されたデザイン',
+          en: 'Minimalist line art of [subject], one-stroke style, simple lines, white background, sophisticated design',
         };
       default:
         return { jp: '', en: '' };
@@ -212,35 +232,36 @@
   function buildImagePrompt({ rawText, diary, style = 'watercolor', mood = 'calm', aspect = '1:1', detail = 'balanced', includeTitle = true }) {
     const tone = detectTone(rawText);
     const kws = extractKeywords(rawText, 12);
-    const preset = stylePreset(style);
+    let preset = stylePreset(style);
     const toneHint = toneHints(tone);
     const detailHint = detailPreset(detail);
     const moodHint = moodPreset(mood);
-    const title = firstLine(diary || rawText);
 
-    const ratio = aspect; // consumer tool interprets
+    const subject = kws.slice(0, 6).join('、');
+    const personDescription = kws.slice(0, 6).join('、');
+    const characterDescription = kws.slice(0, 6).join('、');
+    const emotion = moodHint.jp;
+    const color = '無地';
+    const background = 'シンプルな背景';
 
-    const jpTextPolicy = includeTitle
-      ? `文字はイメージ作成の参考情報。基本は描かない。必要な場合のみ、ごく小さなタイトルを許可（簡素・控えめ）。その他の文字・字幕・透かし・ロゴは描かない`
-      : `文字はイメージ作成の参考情報であり、画像内には描かない（字幕・透かし・ロゴ・英字も不可）`;
+    preset.jp = preset.jp.replace(/\[描きたいもの\]/g, subject);
+    preset.jp = preset.jp.replace(/\ \[人物の説明\]/g, personDescription);
+    preset.jp = preset.jp.replace(/\ \[感情や表情\]/g, emotion);
+    preset.jp = preset.jp.replace(/\ \[色\]/g, color);
+    preset.jp = preset.jp.replace(/\ \[キャラクターの説明\]/g, characterDescription);
+    preset.jp = preset.jp.replace(/\ \[感情\]/g, emotion);
+    preset.jp = preset.jp.replace(/\ \[背景\]/g, background);
+    preset.jp = preset.jp.replace(/\ \[被写体\]/g, subject);
 
-    const enTextPolicy = includeTitle
-      ? `treat text as conceptual guidance only. prefer no text. if absolutely needed, allow a tiny, subtle title only; no other text, captions, subtitles, watermarks, logos, letters`
-      : `text is guidance only; do not render any text in the image (no captions, subtitles, watermarks, logos, letters)`;
+    preset.en = preset.en.replace(/\ \[subject\]/g, kws.slice(0, 6).join(', '));
+    preset.en = preset.en.replace(/\ \[person description\]/g, kws.slice(0, 6).join(', '));
+    preset.en = preset.en.replace(/\ \[emotion\/expression\]/g, moodHint.en);
+    preset.en = preset.en.replace(/\ \[color\]/g, 'solid');
+    preset.en = preset.en.replace(/\ \[character description\]/g, kws.slice(0, 6).join(', '));
+    preset.en = preset.en.replace(/\ \[emotion\]/g, moodHint.en);
+    preset.en = preset.en.replace(/\ \[background\]/g, 'simple background');
 
-    const subjectJp = kws.slice(0, 4).join('、');
-    const subjectEn = kws.slice(0, 4).join(', ');
-
-    const jp = [
-      `日記の一場面を描く: ${kws.slice(0, 6).join('、')}`,
-      `情景: ${moodHint.jp}（${toneHint.jp}）`,
-      `スタイル: ${preset.jp}`,
-      `構図: 自然で読みやすいレイアウト、主要被写体を中央付近に`,
-      `質感: ${detail === 'high' ? '精密な質感、繊細な陰影' : detail === 'simple' ? '簡潔な質感、フラットな陰影' : '程よい質感、柔らかな陰影'}`,
-      jpTextPolicy,
-      `アスペクト比: ${ratio}`,
-      subjectJp ? `被写体: ${subjectJp}` : '',
-    ].filter(Boolean).join(' / ');
+    const ratio = aspect;
 
     const en = [
       `scene from a diary: ${kws.slice(0, 6).join(', ')}`,
@@ -248,13 +269,35 @@
       `${moodHint.en} (${toneHint.en})`,
       `composition: readable layout, main subject near center`,
       `${detailHint}`,
-      `${enTextPolicy}`,
       `aspect: ${ratio}`,
       `high quality, sharp focus, coherent anatomy, consistent lighting`,
-      subjectEn ? `subject: ${subjectEn}` : '',
     ].join(' / ');
 
-    const prompt = `${jp} \n-- ${en}`;
+    const prompt = [
+      '以下の日記の内容を元に、最も印象的な場面を想像して、感情が伝わるような画像を1枚作成してください。',
+      '文章はイメージ作成の参考情報であり、画像内に文字（字幕・透かし・ロゴ・英字）は描かないでください。',
+      '',
+      '【日記】',
+      diary,
+      '',
+      '【画像のスタイル・雰囲気】',
+      '',
+      `スタイル: ${preset.jp}`,
+      '',
+      `雰囲気: ${moodHint.jp}（${toneHint.jp}）`,
+      '',
+      '構図: 自然で読みやすいレイアウトで、日記の主題が伝わるように。',
+      '',
+      `アスペクト比: ${ratio}`,
+      '',
+      `質感: ${detail === 'high' ? '精密な質感、繊細な陰影' : detail === 'simple' ? '簡潔な質感、フラットな陰影' : '程よい質感、柔らかな陰影'}`,
+      '',
+      '高品質で、焦点が合い、照明が一貫していること',
+      '',
+      '【生成の指示】',
+      en,
+    ].join('\n');
+
     return { prompt, tone, keywords: kws, diary };
   }
 

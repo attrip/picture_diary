@@ -46,4 +46,3 @@
 
   global.PDLog = { add, list, count, clear, exportJson };
 })(window);
-

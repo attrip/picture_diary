@@ -1,8 +1,8 @@
 {
   "name": "Picture Diary",
   "short_name": "Diary",
-  "start_url": "/picture_diary/",
-  "scope": "/picture_diary/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0f1216",
   "theme_color": "#0f1216",

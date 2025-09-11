@@ -381,7 +381,7 @@
     if (chatFinalize) chatFinalize.style.display = isMemoMode ? 'none' : '';
 
     if (isMemoMode) {
-      addMsg('メモをどうぞ。入力内容は下に自動で反映されます。', 'assistant');
+      addMsg('メモをどうぞ。入力内容は下に自動で反映されます。', 'assistant', { typing: true, speed: 32 });
       chatInput.placeholder = 'ここにメモを入力（Ctrl/⌘+Enterで送信）';
       rawEl.value = ''; // Clear raw text area for new memo session
       return;
@@ -545,7 +545,6 @@
     // Log chat finalize as image prompt with answers
     try {
       PDLog && PDLog.add('chat-finalize', {
-        raw,
         answers: state && state.answers,
         mode: chatModeEl && chatModeEl.value,
         diaryStyle: (diaryStyleEl && diaryStyleEl.value) || 'prose',
@@ -655,10 +654,8 @@
       }
       const isUndo = (e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z');
       if (isUndo) {
-        if (!chatInput.value) {
-          e.preventDefault();
-          undoLast();
-        }
+        e.preventDefault();
+        undoLast();
       }
     });
   }
@@ -975,12 +972,7 @@
       type.textContent = it.type === 'music' ? 'music' : (it.type === 'chat-finalize' ? 'chat' : 'image');
       const title = document.createElement('div');
       title.className = 'history-title';
-      let line = '(no title)';
-      if (it.type === 'music') {
-        line = firstLineOf(it.theme || it.prompt || '');
-      } else {
-        line = firstLineOf(it.raw || it.diary || it.prompt || '');
-      }
+      const line = firstLineOf(it.raw || (it.answers && Object.values(it.answers)[0]) || it.theme || it.diary || it.prompt || '');
       title.textContent = line || '(no title)';
       const ts = document.createElement('span');
       ts.className = 'history-ts';
@@ -1065,4 +1057,50 @@
   } else {
     ensurePngIcons();
   }
+
+  // --- Theme (Dark/Light Mode) ---
+  const themeToggle = document.getElementById('theme-toggle');
+  const THEME_KEY = 'picture-diary-theme';
+
+  function applyTheme(theme) {
+    // Set theme on body
+    document.body.dataset.theme = theme;
+    // Update button icon
+    if (themeToggle) {
+      themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
+    }
+    // Update meta theme-color for mobile address bar
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.content = theme === 'light' ? '#f0f2f5' : '#0f1216';
+    }
+  }
+
+  function toggleTheme() {
+    const currentTheme = document.body.dataset.theme || 'dark';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    applyTheme(newTheme);
+    try {
+      localStorage.setItem(THEME_KEY, newTheme);
+    } catch (_) { /* noop */ }
+  }
+
+  function initTheme() {
+    let savedTheme;
+    try {
+      savedTheme = localStorage.getItem(THEME_KEY);
+    } catch (_) { /* noop */ }
+    
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const defaultTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+    
+    applyTheme(defaultTheme);
+  }
+
+  if (themeToggle) {
+    themeToggle.addEventListener('click', toggleTheme);
+  }
+
+  // Initialize theme on load
+  initTheme();
 })();

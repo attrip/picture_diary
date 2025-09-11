@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Picture Diary</title>
     <meta name="description" content="テキストから日記を整形し、画像と音楽のプロンプトを生成するミニWebアプリ。" />
-    <link rel="canonical" href="https://attrip.github.io/picture_diary/" />
+    <link rel="canonical" href="./" />
 
     <!-- App Icons -->
     <link rel="icon" type="image/svg+xml" href="./assets/icon.svg" />
@@ -23,17 +23,22 @@
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Picture Diary" />
     <meta property="og:description" content="テキストから日記整形＋画像/音楽プロンプトを生成。" />
-    <meta property="og:url" content="https://attrip.github.io/picture_diary/" />
+    <meta property="og:url" content="./" />
     <!-- Use repo OG image as fallback until a local one is provided -->
-    <meta property="og:image" content="https://opengraph.githubassets.com/1/attrip/picture_diary" />
+    <meta property="og:image" content="./assets/icon.svg" />
     <meta name="twitter:card" content="summary_large_image" />
 
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <header class="container">
-      <h1>Picture Diary</h1>
-      <p class="sub">テキストを日記に整形し、絵を作るためのプロンプトを生成します。</p>
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <h1>Picture Diary</h1>
+          <p class="sub">テキストを日記に整形し、絵を作るためのプロンプトを生成します。</p>
+        </div>
+        <button id="theme-toggle" type="button" title="テーマを切り替え" style="font-size: 24px; background: transparent; border: none; cursor: pointer; padding: 0; margin-top: 12px; color: var(--text);">☀️</button>
+      </div>
       <nav class="steps" aria-label="作成ステップ">
         <ol>
           <li id="step-input" aria-current="step">1. 入力</li>
@@ -50,37 +55,33 @@
           <div class="field">
             <label for="chatMode">作成タイプ</label>
             <select id="chatMode">
-              <option value="essay" selected>エッセイ</option>
+              <option value="essay">エッセイ</option>
               <option value="diary">日記</option>
               <option value="rap">ラップ</option>
-              <option value="memo">メモ</option>
+              <option value="memo" selected>メモ</option>
             </select>
           </div>
         </div>
         <div id="chat" class="chat">
           <div id="chatMessages" class="messages"></div>
-          <div class="chat-controls">
-            <textarea id="chatInput" rows="2" placeholder="ここに返信を入力（Enterで改行、Ctrl/⌘+Enterで送信）"></textarea>
-            <button id="chatSend">送信</button>
+          <textarea id="chatInput" rows="2" placeholder="ここに返信を入力（Enterで改行、Ctrl/⌘+Enterで送信）"></textarea>
+          <div class="actions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0;">
+            <button id="chatRestart">やり直す</button>
+            <button id="chatUndo">取り消し</button>
+            <button id="chatSkip">スキップ</button>
+            <button id="chatSend" class="primary">送信</button>
+            <button id="chatIdeasRefresh" type="button">アイデアを更新</button>
+            <button id="chatFinalize" class="primary">まとめて生成</button>
           </div>
           <div class="actions" style="margin-top: 4px; justify-content: flex-end;">
             <label style="display:flex; gap:8px; align-items:center; cursor:pointer; font-size: 0.9em;">
-              <input id="chatEnterToSend" type="checkbox" />
+              <input id="chatEnterToSend" type="checkbox" checked />
               <span>Enterで送信</span>
             </label>
           </div>
           <div class="ideas-row">
             <small class="hint">アイデアに迷ったら：下の候補をクリック</small>
             <div class="chips" id="chatIdeas"></div>
-            <div class="actions" style="margin:4px 0 0;">
-              <button id="chatIdeasRefresh" type="button">アイデアを更新</button>
-            </div>
-          </div>
-          <div class="actions">
-            <button id="chatSkip">スキップ</button>
-            <button id="chatUndo">取り消し</button>
-            <button id="chatRestart">やり直す</button>
-            <button id="chatFinalize" class="primary">まとめて生成</button>
           </div>
           <p class="hint">質問に答えると、下の入力欄に自動で文章をまとめます。</p>
         </div>
@@ -95,19 +96,16 @@
           <div class="field">
             <label for="style">スタイル</label>
             <select id="style">
-              <option value="watercolor">水彩画 / watercolor</option>
-              <option value="watercolor-minimal-portrait">水彩（ミニマル和紙・バストアップ）</option>
-              <option value="manga">マンガ風 / manga style</option>
-              <option value="oil">油絵 / oil painting</option>
-              <option value="photo">写真風 / photorealistic</option>
-              <option value="pastel">パステル / pastel</option>
-              <option value="flat">フラットイラスト / flat illustration</option>
-              <option value="pencil">色鉛筆 / colored pencil</option>
-              <option value="ink">墨絵 / ink wash (sumi-e)</option>
-              <option value="ukiyoe">浮世絵風 / ukiyo-e style</option>
-              <option value="retro-anime">レトロアニメ / retro anime</option>
-              <option value="pixel">ドット絵 / pixel art</option>
-              <option value="toy-statuette-3d-desk">3Dプリンターパターン / toy statuette desk scene</option>
+              <option value="ukiyoe">浮世絵スタイル</option>
+              <option value="photoreal-portrait">フォトリアル・ポートレート</option>
+              <option value="anime-character">アニメ風キャラクター</option>
+              <option value="impasto-oil">厚塗り油絵</option>
+              <option value="retro-film">レトロなフィルム写真</option>
+              <option value="detailed-pen">細密なペン画</option>
+              <option value="3d-character">3Dモデルキャラクター</option>
+              <option value="pop-art">ポップアート</option>
+              <option value="steampunk">スチームパンク</option>
+              <option value="minimalist-line-art">ミニマリスト・ラインアート</option>
             </select>
           </div>
           <div class="field">
@@ -380,10 +378,10 @@
       <ul id="historyList" class="history-list"></ul>
     </section>
 
-    <script src="./lib/prompt.js"></script>
-    <script src="./lib/music.js"></script>
-    <script src="./lib/log.js"></script>
-    <script src="./app/main.js"></script>
+    <script src="lib/prompt.js"></script>
+    <script src="lib/music.js"></script>
+    <script src="lib/log.js"></script>
+    <script src="app/main.js"></script>
   </body>
   <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
   </html>
