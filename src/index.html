@@ -175,7 +175,13 @@
           </div>
         </details>
 
-        <button id="generateBtn" class="primary">日記とプロンプトを生成</button>
+        <div class="actions" style="justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <button id="generateBtn" class="primary">全部まとめて生成（日記＋画像＋音楽）</button>
+          <label style="display:flex; gap:8px; align-items:center; font-size: 0.95em;">
+            <input id="autoGenerate" type="checkbox" />
+            <span>自動生成（入力に応じて自動更新）</span>
+          </label>
+        </div>
       </section>
 
       <section class="card">
@@ -210,28 +216,35 @@
       </section>
 
       <section class="card wide">
-        <h2>Suno用スタイル変換</h2>
-        <div class="row">
-          <div class="field" style="min-width:320px;">
-            <label for="sunoDesc">自由入力（曲の説明）</label>
-            <textarea id="sunoDesc" rows="4" placeholder="例：雨上がりの夜、静かな街を歩く気分で。少しノスタルジック、でも前向き。"></textarea>
+        <details>
+          <summary><h2>音楽プロンプト（Suno風）</h2></summary>
+          <div id="musicCard" style="margin-top: 1rem;">
+            <h3 style="margin:12px 0 6px;">自由入力（説明から自動変換）</h3>
+            <label for="musicDesc" class="label">音楽の説明（日本語/英語OK）</label>
+            <textarea id="musicDesc" rows="3" placeholder="例：高揚感のあるEDM。ブリッジでコール＆レスポンス。ボーカルなし。夜のドライブ。"></textarea>
+            
+            <button id="musicGenerate" class="primary">音楽プロンプトを生成</button>
+            
+            <h3 style="margin:12px 0 6px;">音楽プロンプト</h3>
+            <textarea id="musicOut" rows="8" readonly></textarea>
+            <div class="actions">
+              <button data-copy="#musicOut">コピー</button>
+              <button data-open="chatgpt" data-source="#musicOut">ChatGPTで開く</button>
+              <button data-open="gemini" data-source="#musicOut">Geminiで開く</button>
+            </div>
           </div>
-        </div>
-        <div class="row">
-          <div class="field" style="min-width:320px;">
-            <label for="sunoExtra">さらに言いたいこと（任意）</label>
-            <textarea id="sunoExtra" rows="3" placeholder="例：女性ボーカルでささやく感じ。テンポは100前後。アコギ・ベース・柔らかいパッド。"></textarea>
-          </div>
-        </div>
-        <button id="sunoMake" class="primary">Sunoプロンプト作成</button>
-        <h3 style="margin:12px 0 6px;">生成されたプロンプト</h3>
-        <textarea id="sunoPromptOut" rows="10" readonly></textarea>
+        </details>
+      </section>
+
+      <section class="card wide">
+        <h2>まとめプロンプト（全部依頼用）</h2>
+        <p class="hint">下記をChatGPT/Geminiに貼ると、まず「提案（実行プラン含む）」を出し、あなたが「はい」と返すと画像/音声の生成に進む流れになります（モデル側でツールが使える場合）。</p>
+        <textarea id="masterPromptOut" rows="12" readonly></textarea>
         <div class="actions">
-          <button data-copy="#sunoPromptOut">コピー</button>
-          <button data-open="chatgpt" data-source="#sunoPromptOut">ChatGPTで開く</button>
-          <button data-open="gemini" data-source="#sunoPromptOut">Geminiで開く</button>
+          <button data-copy="#masterPromptOut">コピー</button>
+          <button data-open="chatgpt" data-source="#masterPromptOut">ChatGPTで開く</button>
+          <button data-open="gemini" data-source="#masterPromptOut">Geminiで開く</button>
         </div>
-        <p class="hint">上記は “Suno Style Prompt Optimizer” への依頼文です。ChatGPT/Geminiで開くと自動でコピーされるので、そのまま貼り付けて送信してください。</p>
       </section>
     </main>
 
@@ -252,7 +265,9 @@
 
     <script src="lib/prompt.js"></script>
     <script src="lib/log.js"></script>
+    <script src="lib/rap.js"></script>
+    <script src="lib/master.js"></script>
     <script src="app/main.js"></script>
+    <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
   </body>
-  <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
   </html>
